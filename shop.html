@@ -1,8 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse and shop for campus essentials like books, electronics, fashion, and services at Nirvana Mart.">
   <title>Shop — NIRVANA MART</title>
   <link rel="stylesheet" href="shared/css/main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -259,7 +260,10 @@
       </div>
       <div class="form-group"><label class="form-label required">Quantity</label><input type="number" id="pQty" class="form-control" value="1" min="1" required></div>
       <div class="form-group"><label class="form-label required">Description (max 200 chars)</label><textarea id="pDesc" class="form-control" rows="3" maxlength="200" placeholder="Describe the item..." required></textarea></div>
-      <div class="form-group"><label class="form-label required">Product Image URL</label><input type="url" id="pImage" class="form-control" placeholder="https://... (Unsplash or any image URL)" required></div>
+      <div class="form-group">
+        <label class="form-label required">Product Image</label>
+        <input type="file" id="pImageFile" class="form-control" accept="image/*" required>
+      </div>
       <div class="form-group"><label class="form-label">Location on Campus</label><input type="text" id="pLocation" class="form-control" placeholder="North Campus, Hostel Block A..."></div>
       <button type="submit" class="btn btn-primary btn-full" id="sellSubmitBtn"><i class="fas fa-check"></i> Submit for Approval</button>
     </form>
@@ -719,6 +723,16 @@ async function submitProduct(e) {
   const btn = document.getElementById('sellSubmitBtn');
   btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
   try {
+    let finalImageUrl = '';
+    const fileInput = document.getElementById('pImageFile');
+    if (fileInput && fileInput.files.length) {
+      const formData = new FormData();
+      formData.append('image', fileInput.files[0]);
+      const uploadRes = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + Auth.getToken() }, body: formData });
+      if (!uploadRes.ok) throw new Error('Failed to upload image');
+      const uploadData = await uploadRes.json();
+      finalImageUrl = uploadData.url;
+    } else { throw new Error('Please select an image'); }
     await API.post('/products', {
       title: document.getElementById('pTitle').value,
       category: document.getElementById('pCategory').value,
@@ -727,7 +741,7 @@ async function submitProduct(e) {
       originalPrice: document.getElementById('pOriginal').value || null,
       quantity: parseInt(document.getElementById('pQty').value),
       description: document.getElementById('pDesc').value,
-      imageUrl: document.getElementById('pImage').value,
+      imageUrl: finalImageUrl,
       location: document.getElementById('pLocation').value
     });
     showToast('Product submitted for admin approval! 🎉', 'success');

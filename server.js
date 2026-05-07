@@ -206,8 +206,9 @@ async function initDb() {
     CREATE TABLE IF NOT EXISTS notifications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_roll TEXT NOT NULL,
-      title TEXT NOT NULL,
+      title TEXT DEFAULT 'Notification',
       message TEXT NOT NULL,
+      type TEXT DEFAULT 'info',
       is_read INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now'))
     );
@@ -265,21 +266,7 @@ async function initDb() {
       is_admin INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now'))
     );
-    CREATE TABLE IF NOT EXISTS notifications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_roll TEXT NOT NULL,
-      message TEXT NOT NULL,
-      type TEXT DEFAULT 'info',
-      is_read INTEGER DEFAULT 0,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS otp_store (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      roll_number TEXT NOT NULL,
-      otp TEXT NOT NULL,
-      expires_at TEXT NOT NULL,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
+    /* notifications and otp_store defined above — no duplicate */
     CREATE TABLE IF NOT EXISTS student_data (
       roll_number TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -1173,37 +1160,7 @@ app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('vm_token').json({ success: true });
 });
 
-// ─── PASSWORD RESET (OTP-based) ────────────────────────────────────────────────────
-app.post('/api/auth/forgot-password/request', async (req, res) => {
-  try {
-    const { rollNumber, phone } = req.body;
-    if (!rollNumber || !phone) return res.status(400).json({ error: 'Roll number and phone required' });
-    const user = await db.get('SELECT id FROM users WHERE roll_number = ? AND phone = ?', [rollNumber, phone]);
-    if (!user) return res.status(404).json({ error: 'No account found with that roll number and phone' });
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min
-    await db.run('DELETE FROM otp_store WHERE roll_number = ?', [rollNumber]);
-    await db.run('INSERT INTO otp_store (roll_number,otp,expires_at) VALUES (?,?,?)', [rollNumber, otp, expires]);
-    // In a real deployment this OTP would be sent via SMS/email.
-    // For now, return it in the response (dev mode).
-    res.json({ success: true, otp, message: 'OTP generated. In production this would be sent via SMS.' });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.post('/api/auth/forgot-password/reset', async (req, res) => {
-  try {
-    const { rollNumber, otp, newPassword } = req.body;
-    if (!rollNumber || !otp || !newPassword) return res.status(400).json({ error: 'All fields required' });
-    if (newPassword.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    const record = await db.get('SELECT * FROM otp_store WHERE roll_number = ?', [rollNumber]);
-    if (!record || record.otp !== otp) return res.status(400).json({ error: 'Invalid OTP' });
-    if (new Date(record.expires_at) < new Date()) return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
-    const hash = await bcrypt.hash(newPassword, 10);
-    await db.run('UPDATE users SET password_hash = ? WHERE roll_number = ?', [hash, rollNumber]);
-    await db.run('DELETE FROM otp_store WHERE roll_number = ?', [rollNumber]);
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+// Forgot-password routes are defined earlier (with email delivery) — no duplicate needed here.
 
 // ─── PDF INVOICE ────────────────────────────────────────────────────────────────────
 app.get('/api/orders/:id/invoice', authenticate, async (req, res) => {
@@ -1306,7 +1263,7 @@ initDb().then(() => {
     console.log(`   → Home:   http://localhost:${PORT}/`);
     console.log(`   → Shop:   http://localhost:${PORT}/shop`);
     console.log(`   → Admin:  http://localhost:${PORT}/nirvanamart-admin-portal`);
-    console.log(`\n   Admin credentials: Secret=${ADMIN_SECRET} | Password=${ADMIN_PASSWORD}\n`);
+    // Admin credentials intentionally omitted from logs for security
   });
 }).catch(err => {
   console.error('❌ Failed to initialize database:', err.message);

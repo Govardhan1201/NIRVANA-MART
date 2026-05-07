@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -34,7 +34,33 @@
     .notif-item.unread { border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.04); }
     .notif-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-primary); flex-shrink: 0; margin-top: 5px; }
     .notif-dot.read { background: var(--border-color); }
-    @media (max-width: 900px) { .dash-layout { grid-template-columns: 1fr; } .dash-sidebar { position: static; } }
+    @media (max-width: 768px) {
+      .dash-layout { grid-template-columns: 1fr !important; gap: 8px !important; }
+      .dash-sidebar { position: static !important; padding: 0 !important; background: transparent !important; border: none !important; box-shadow: none !important; }
+      .profile-block-desktop { display: none !important; }
+      .mobile-profile-header {
+        display: flex !important; align-items: center; justify-content: space-between;
+        padding: 14px 18px; cursor: pointer; background: var(--bg-card);
+        border-radius: 18px; border: 1.5px solid var(--border-color); margin-bottom: 0;
+        -webkit-tap-highlight-color: transparent; user-select: none;
+      }
+      .mph-info { display: flex; align-items: center; gap: 12px; }
+      .mph-info img { width: 40px; height: 40px; border-radius: 12px; border: 2px solid var(--accent-primary); object-fit: cover; }
+      .mph-name { font-weight: 700; font-size: 0.92rem; color: var(--text-primary); }
+      .mph-section { font-size: 0.72rem; color: var(--text-muted); }
+      .mph-chevron { transition: transform 0.3s ease; color: var(--text-muted); font-size: 0.85rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--bg-primary); border-radius: 8px; flex-shrink: 0; }
+      .mobile-profile-header.open .mph-chevron { transform: rotate(180deg); color: var(--accent-primary); }
+      .dash-nav-menu { max-height: 0; overflow: hidden; transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease; opacity: 0; background: var(--bg-card); border-radius: 0 0 18px 18px; border: 1.5px solid var(--border-color); border-top: none; margin-bottom: 14px; }
+      .dash-nav-menu.open { max-height: 700px; opacity: 1; }
+      .dash-nav-menu-inner { padding: 6px 12px 14px; }
+      .dash-nav-item { font-size: 0.88rem !important; padding: 10px 12px !important; border-radius: 10px !important; }
+      .order-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    }
+    @media (min-width: 769px) {
+      .mobile-profile-header { display: none; }
+      .dash-nav-menu { max-height: none !important; opacity: 1 !important; overflow: visible !important; background: transparent !important; border: none !important; }
+      .dash-nav-menu-inner { padding: 0; }
+    }
   </style>
 
   <!-- PWA Manifest & Theme -->
@@ -70,26 +96,43 @@
     </div>
 
     <div class="dash-layout">
-      <!-- Sidebar -->
+      <!-- Mobile Collapsible Profile Header — hidden on desktop -->
+      <div class="mobile-profile-header" id="mobileProfileHeader" onclick="toggleMobileMenu()">
+        <div class="mph-info">
+          <img id="profileAvatarMobile" src="https://ui-avatars.com/api/?name=U&background=c8923a&color=fff" alt="Profile">
+          <div>
+            <div class="mph-name" id="profileNameMobile">My Profile</div>
+            <div class="mph-section" id="profileSectionMobile">Overview</div>
+          </div>
+        </div>
+        <div class="mph-chevron"><i class="fas fa-chevron-down"></i></div>
+      </div>
+
+      <!-- Sidebar (desktop: full / mobile: collapsible panel) -->
       <div class="dash-sidebar" data-reveal="left">
-        <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid var(--border-color);margin-bottom:16px;">
+        <div class="profile-block-desktop" style="text-align:center;padding:16px 0 20px;border-bottom:1px solid var(--border-color);margin-bottom:16px;">
           <img id="profileAvatar" src="" style="width:68px;height:68px;border-radius:20px;margin-bottom:12px;border:3px solid var(--accent-primary);" loading="lazy">
           <div style="font-weight:800;font-size:1rem;" id="profileName">—</div>
           <div style="font-size:0.8rem;color:var(--text-muted);" id="profileInfo">—</div>
         </div>
-        <div class="dash-nav-item active" onclick="showSection('overview',this)"><i class="fas fa-home"></i> Overview</div>
-        <div class="dash-nav-item" onclick="showSection('orders',this)"><i class="fas fa-shopping-bag"></i> My Orders</div>
-        <div class="dash-nav-item" onclick="showSection('tracking',this)"><i class="fas fa-map-marker-alt"></i> Order Tracking</div>
-        <div class="dash-nav-item" onclick="showSection('wishlist',this)"><i class="fas fa-heart"></i> Wishlist</div>
-        <div class="dash-nav-item" onclick="showSection('analytics',this)"><i class="fas fa-chart-pie"></i> Spending Analytics</div>
-        <div class="dash-nav-item" onclick="showSection('reviews',this)"><i class="fas fa-star"></i> My Reviews</div>
-        <div class="dash-nav-item" onclick="showSection('notifs',this)">
-          <i class="fas fa-bell"></i> Notifications
-          <span id="navNotifBadge" style="background:var(--accent-red);color:white;font-size:0.72rem;padding:2px 7px;border-radius:8px;font-weight:800;margin-left:auto;display:none;"></span>
+        <div class="dash-nav-menu" id="dashNavMenu">
+          <div class="dash-nav-menu-inner">
+            <div class="dash-nav-item active" onclick="showSection('overview',this)"><i class="fas fa-home"></i> Overview</div>
+            <div class="dash-nav-item" onclick="showSection('orders',this)"><i class="fas fa-shopping-bag"></i> My Orders</div>
+            <div class="dash-nav-item" onclick="showSection('tracking',this)"><i class="fas fa-map-marker-alt"></i> Order Tracking</div>
+            <div class="dash-nav-item" onclick="showSection('wishlist',this)"><i class="fas fa-heart"></i> Wishlist</div>
+            <div class="dash-nav-item" onclick="showSection('analytics',this)"><i class="fas fa-chart-pie"></i> Spending Analytics</div>
+            <div class="dash-nav-item" onclick="showSection('reviews',this)"><i class="fas fa-star"></i> My Reviews</div>
+            <div class="dash-nav-item" onclick="showSection('notifs',this)">
+              <i class="fas fa-bell"></i> Notifications
+              <span id="navNotifBadge" style="background:var(--accent-red);color:white;font-size:0.72rem;padding:2px 7px;border-radius:8px;font-weight:800;margin-left:auto;display:none;"></span>
+            </div>
+            <div class="dash-nav-item" onclick="showSection('settings',this)"><i class="fas fa-cog"></i> Settings</div>
+            <div class="dash-nav-item" style="margin-top:8px;color:var(--accent-red);" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+          </div>
         </div>
-        <div class="dash-nav-item" onclick="showSection('settings',this)"><i class="fas fa-cog"></i> Settings</div>
-        <div class="dash-nav-item" style="margin-top:12px;color:var(--accent-red);" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
       </div>
+
 
       <!-- Main Content -->
       <div>
@@ -310,6 +353,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('profileName').textContent = currentUser.name;
   document.getElementById('profileInfo').textContent = `${currentUser.branch} • Year ${currentUser.year}`;
   document.getElementById('dashTitle').textContent = `Hello, ${currentUser.name.split(' ')[0]}! 👋`;
+
+  // ── Populate mobile collapsible header ──────────────────────────
+  const mobileAvatar = document.getElementById('profileAvatarMobile');
+  if (mobileAvatar) mobileAvatar.src = avatar;
+  const mobileName = document.getElementById('profileNameMobile');
+  if (mobileName) mobileName.textContent = currentUser.name;
+
+  // ── Remove any duplicate .dash-sidebar elements ──────────────────
+  const sidebars = document.querySelectorAll('.dash-sidebar');
+  if (sidebars.length > 1) {
+    for (let i = 1; i < sidebars.length; i++) sidebars[i].remove();
+  }
+
 
   // Settings panel
   document.getElementById('settingsAvatar').src = avatar;
@@ -648,6 +704,26 @@ function showSection(id, navItem) {
     const totalSpent = allOrders.reduce((s, o) => s + (o.total_paid||0), 0);
     buildCharts(allOrders, totalSpent);
   }
+  // Update mobile header section label
+  const sectionLabels = { overview:'Overview', orders:'My Orders', tracking:'Order Tracking', wishlist:'Wishlist', analytics:'Spending Analytics', reviews:'My Reviews', notifs:'Notifications', settings:'Settings' };
+  const sectionEl = document.getElementById('profileSectionMobile');
+  if (sectionEl) sectionEl.textContent = sectionLabels[id] || 'My Profile';
+}
+
+// ── Mobile Menu Toggle ────────────────────────────────────────────
+function toggleMobileMenu() {
+  const menu = document.getElementById('dashNavMenu');
+  const header = document.getElementById('mobileProfileHeader');
+  if (!menu || !header) return;
+  const open = menu.classList.toggle('open');
+  header.classList.toggle('open', open);
+}
+
+function closeMobileMenu() {
+  const menu = document.getElementById('dashNavMenu');
+  const header = document.getElementById('mobileProfileHeader');
+  if (menu) menu.classList.remove('open');
+  if (header) header.classList.remove('open');
 }
 </script>
 
@@ -666,15 +742,13 @@ function showSection(id, navItem) {
   <a href="shop.html" class="bottom-nav-item" id="bn-shop">
     <i class="fas fa-store"></i><span>Shop</span>
   </a>
-  <a href="shop.html?cart=1" class="bottom-nav-item" id="bn-cart">
-    <div style="position:relative;">
-      <i class="fas fa-shopping-bag"></i>
-      <span class="bottom-nav-badge" id="mobileCartCount">0</span>
-    </div>
+  <a href="shop.html?cart=1" class="bottom-nav-item" id="bn-cart" style="position:relative;">
+    <i class="fas fa-shopping-bag"></i>
+    <span class="bottom-nav-badge" id="mobileCartCount" style="display:none;">0</span>
     <span>Cart</span>
   </a>
-  <a href="buyer.html" class="bottom-nav-item" id="bn-profile">
-    <i class="fas fa-user-circle"></i><span>Profile</span>
+  <a href="buyer.html" class="bottom-nav-item active" id="bn-profile">
+    <i class="fas fa-user"></i><span>Profile</span>
   </a>
 </nav>
 <script>

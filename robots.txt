@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /api/
+Disallow: /nirvanamart-admin-portal
+Disallow: /admin.html
+Disallow: /seller.html
+Disallow: /buyer.html
+
+Allow: /
+Allow: /shop
+Allow: /index.html

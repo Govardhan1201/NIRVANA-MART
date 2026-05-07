@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -425,7 +425,6 @@
       flex-wrap: wrap;
     }
 
-
     @keyframes float-slow {
       0%, 100% { transform: translateX(-50%) translateY(0); }
       50%       { transform: translateX(-50%) translateY(-6px); }
@@ -511,6 +510,7 @@
           src="CART.html"
           title="3D Particle Shopping Cart"
           scrolling="no"
+          loading="lazy"
           allow="accelerometer; autoplay"
         ></iframe>
       </div>
@@ -747,8 +747,6 @@
     </div>
   </div>
 
-
-
   <!-- ─── CTA ──────────────────────────────────────────────── -->
   <section class="cta-section" data-reveal>
     <div class="orb-a orb" style="position:absolute;"></div>
@@ -793,16 +791,16 @@
           </ul>
         </div>
         <div class="footer-links">
-          <h4>Contact</h4>
+          <h4>Legal</h4>
           <ul>
-            <li><a href="mailto:support@nirvanamart.com">📧 support@nirvanamart.com</a></li>
-            <li><a href="#">📞 +91 98765 43210</a></li>
-            <li><a href="#">📍 campus, Pune</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="mailto:support@nirvanamart.com">Contact Support</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2025 NIRVANA MART. All rights reserved. Made with ❤️ by Students, for Students.</p>
+        <p>&copy; 2026 Nirvana Mart. All rights reserved.</p>
       </div>
     </div>
   </footer>
@@ -849,11 +847,11 @@
 
     // Load best-sellers from API
     function cloudinaryOptimize(url, w) {
-  if (!url || !url.includes('res.cloudinary.com')) return url;
-  return url.replace('/upload/', '/upload/w_' + w + ',q_auto,f_auto/');
-}
+      if (!url || !url.includes('res.cloudinary.com')) return url;
+      return url.replace('/upload/', '/upload/w_' + w + ',q_auto,f_auto/');
+    }
 
-async function loadBestSellers() {
+    async function loadBestSellers() {
       try {
         const products = await API.get('/products/bestsellers');
         const grid = document.getElementById('bestsellersGrid');
@@ -865,278 +863,117 @@ async function loadBestSellers() {
             <img src="${cloudinaryOptimize(p.image_url, 400)}" alt="${p.title}" class="product-card-img" loading="lazy" loading="lazy">
             ${disc > 0 ? `<span style="position:absolute;top:10px;left:10px;background:var(--accent-red);color:white;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:800;">${disc}% OFF</span>` : ''}
             ${p.eco ? `<span style="position:absolute;top:10px;right:10px;background:rgba(16,185,129,0.9);color:white;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:800;">🌿 Eco</span>` : ''}
+            <button class="wishlist-btn" onclick="event.stopPropagation();"><i class="far fa-heart"></i></button>
           </div>
-          <div class="product-card-body">
-            <div class="product-card-title">${p.title}</div>
-            <div style="display:flex;align-items:center;gap:8px;margin:6px 0;">
-              <span class="product-card-price">₹${p.price.toLocaleString()}</span>
-              ${p.original_price ? `<span class="product-card-original">₹${p.original_price.toLocaleString()}</span>` : ''}
+          <div class="product-info">
+            <h3 class="product-title">${p.title}</h3>
+            <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px;">
+              <div class="product-price">₹${p.price}</div>
+              ${disc > 0 ? `<div class="product-original">₹${p.original_price}</div>` : ''}
             </div>
-            <div style="display:flex;align-items:center;gap:4px;margin-top:6px;">
-              <i class="fas fa-star" style="color:#f59e0b;font-size:0.75rem;"></i>
-              <span style="font-size:0.8rem;font-weight:700;">${(p.rating || 4.5).toFixed(1)}</span>
-              <span class="badge badge-condition" style="margin-left:6px;">${p.condition}</span>
+            <div class="product-meta">
+              <span><i class="fas fa-tag"></i> ${p.category}</span>
+              <span><i class="fas fa-star" style="color:#f59e0b"></i> ${p.rating || 'New'}</span>
             </div>
+            <button class="btn btn-primary" style="width:100%;margin-top:12px;padding:10px;" onclick="event.stopPropagation(); addToCart(${p.id})">Add to Cart</button>
           </div>
         </div>`;
         }).join('');
-      } catch (e) {
-        document.getElementById('bestsellersGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)"><a href="shop.html" class="btn btn-primary">Browse Products</a></div>';
-      }
-    }
-    loadBestSellers();
-  </script>
-
-  <script>
-    // ─── Real Student Reviews ──────────────────────────────────
-    let _allReviews = [];
-
-    function renderReviewCard(r, mini) {
-      const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-      const comment = r.comment || 'Great experience on NIRVANA MART!';
-      const productLine = r.product_title ? `<div style="font-size:0.75rem;color:var(--accent-primary);margin-top:4px;font-weight:600;">on ${r.product_title}</div>` : '';
-      if (mini) {
-        return `<div class="testimonial-card card-3d">
-          <div class="testimonial-stars" style="color:#f59e0b;font-size:1.1rem;">${stars}</div>
-          <p class="testimonial-quote">"${comment}"</p>
-          <div class="testimonial-author">
-            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(r.reviewer_name)}&background=6366f1&color=fff&rounded=true&size=48" alt="${r.reviewer_name}">
-            <div>
-              <div class="testimonial-name">${r.reviewer_name}</div>
-              <div class="testimonial-role">${r.reviewer_roll}${productLine}</div>
-            </div>
-          </div>
-        </div>`;
-      }
-      // Full version for modal
-      return `<div style="background:var(--bg-card);border:1.5px solid var(--border-color);border-radius:16px;padding:20px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(r.reviewer_name)}&background=6366f1&color=fff&rounded=true&size=40" style="width:40px;height:40px;border-radius:10px;" alt="">
-            <div>
-              <div style="font-weight:700;font-size:0.9rem;">${r.reviewer_name}</div>
-              <div style="font-size:0.75rem;color:var(--text-muted);">${r.reviewer_roll}${productLine}</div>
-            </div>
-          </div>
-          <div style="color:#f59e0b;font-size:0.95rem;">${stars}</div>
-        </div>
-        <p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.6;">"${comment}"</p>
-        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">${new Date(r.created_at).toLocaleDateString()}</div>
-      </div>`;
+        if (window.refreshCursorTargets) refreshCursorTargets();
+      } catch (err) { console.error(err); }
     }
 
-    const FALLBACK_REVIEWS = [
-      { reviewer_name:'Arjun Patel', reviewer_roll:'CSE • 3rd Year', rating:5, comment:'Got my engineering books at 60% off! The admin verification made me feel completely safe. Best platform for students.', product_title:'Engineering Mathematics Textbook Set', created_at: new Date().toISOString() },
-      { reviewer_name:'Sneha Kulkarni', reviewer_roll:'ECE • 4th Year', rating:5, comment:'Sold my old laptop in just 2 days! The process was so smooth — listed it, admin approved it, buyer paid. Brilliant!', product_title:'MacBook Pro M1', created_at: new Date().toISOString() },
-      { reviewer_name:'Rohan Singh', reviewer_roll:'MECH • 2nd Year', rating:4, comment:'Amazing for hostel essentials. Bought a study chair at half price. Highly recommend to all freshers!', product_title:'JBL Bluetooth Speaker', created_at: new Date().toISOString() }
-    ];
+    // Load mock reviews
+    function loadReviews() {
+      const mockReviews = [
+        { name: "Rahul S.", course: "B.Tech CSE", text: "Got my 3rd year textbooks for half the price. Meeting at the admin desk was super safe.", rating: 5 },
+        { name: "Priya M.", course: "BBA", text: "Sold my old scientific calculator in 2 hours. The cash payment was instant upon delivery to admin.", rating: 5 },
+        { name: "Karan T.", course: "M.Tech", text: "Nirvana Mart is a lifesaver. Found a great second-hand monitor for my dorm setup.", rating: 4 }
+      ];
 
-    async function loadReviews() {
-      try {
-        const reviews = await API.get('/reviews/platform?limit=50');
-        _allReviews = (reviews && reviews.length) ? reviews : FALLBACK_REVIEWS;
-      } catch {
-        _allReviews = FALLBACK_REVIEWS;
-      }
       const grid = document.getElementById('reviewsGrid');
-      const shown = _allReviews.slice(0, 3);
-      grid.innerHTML = shown.map(r => renderReviewCard(r, true)).join('');
-      const wrap = document.getElementById('seeAllReviewsWrap');
-      if (_allReviews.length > 3) { wrap.style.display = 'block'; }
+      grid.innerHTML = mockReviews.map(r => `
+        <div class="card-3d" style="background:var(--bg-card);border:1.5px solid var(--border-color);border-radius:20px;padding:24px;">
+          <div style="display:flex;gap:4px;color:#f59e0b;margin-bottom:12px;font-size:0.9rem;">
+            ${Array(5).fill(0).map((_, i) => `<i class="${i < r.rating ? 'fas' : 'far'} fa-star"></i>`).join('')}
+          </div>
+          <p style="font-size:0.95rem;color:var(--text-secondary);line-height:1.6;margin-bottom:20px;font-style:italic;">"${r.text}"</p>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(r.name)}&background=random" style="width:40px;height:40px;border-radius:50%;">
+            <div>
+              <div style="font-weight:700;font-size:0.9rem;">${r.name}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">${r.course} • Verified ✅</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('seeAllReviewsWrap').style.display = 'block';
+
+      // Setup modal reviews (add more)
+      const allReviews = [...mockReviews,
+      { name: "Amit K.", course: "B.Tech ECE", text: "The UI is so much better than WhatsApp groups.", rating: 5 },
+      { name: "Sneha P.", course: "B.Arch", text: "Great for buying drafting supplies from seniors.", rating: 4 }
+      ];
+      document.getElementById('allReviewsContent').innerHTML = allReviews.map(r => `
+        <div style="padding:16px;background:var(--bg-secondary);border-radius:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-weight:700;">${r.name} <span style="font-size:0.7rem;color:var(--text-muted);font-weight:normal;">${r.course}</span></div>
+            <div style="color:#f59e0b;font-size:0.8rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+          </div>
+          <div style="font-size:0.9rem;color:var(--text-secondary);">${r.text}</div>
+        </div>
+      `).join('');
     }
 
     function openReviewsModal() {
-      document.getElementById('allReviewsContent').innerHTML = _allReviews.map(r => renderReviewCard(r, false)).join('');
-      openModal('allReviewsModal');
+      document.getElementById('allReviewsModal').classList.add('active');
     }
 
-    loadReviews();
-  </script>
-
-
-  <!-- ─── Live Chat Widget ─────────────────────────────────────── -->
-  <div class="chat-widget" id="chatWidget">
-    <div class="chat-panel" id="chatPanel">
-      <div class="chat-panel-header">
-        <div>
-          <div style="font-weight:800;">💬 Support Chat</div>
-          <div style="font-size:0.75rem;opacity:0.85;">We usually reply instantly</div>
-        </div>
-        <button onclick="toggleChat()"
-          style="background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:1rem;">✕</button>
-      </div>
-      <div class="chat-messages-area" id="chatMessages">
-        <div class="chat-msg theirs" style="margin-top:8px;">👋 Hi! Welcome to NIRVANA MART support. How can we help you
-          today?<div class="chat-msg-time">Support</div>
-        </div>
-      </div>
-      <div class="chat-input-row">
-        <input type="text" id="chatInput" placeholder="Type a message..."
-          onkeydown="if(event.key==='Enter')sendChatMsg()">
-        <button class="chat-send-btn" onclick="sendChatMsg()"><i class="fas fa-paper-plane"></i></button>
-      </div>
-    </div>
-    <button class="chat-bubble" onclick="toggleChat()" id="chatBubble" title="Live Chat">
-      <i class="fas fa-comment-dots"></i>
-    </button>
-  </div>
-
-  <script>
-    function toggleChat() {
-      const panel = document.getElementById('chatPanel');
-      panel.classList.toggle('open');
-      if (panel.classList.contains('open')) {
-        document.getElementById('chatInput').focus();
-        loadChatMsgs();
-      }
-    }
-    async function loadChatMsgs() {
-      try {
-        const user = Auth.getUser();
-        if (!user) return;
-        const msgs = await API.get('/chat');
-        const area = document.getElementById('chatMessages');
-        if (!msgs.length) return;
-        area.innerHTML = msgs.map(m => `<div class="chat-msg ${m.is_admin ? 'theirs' : 'mine'}" id="msg-${m.id}">${m.message}<div class="chat-msg-time">${m.is_admin ? 'Support' : 'You'} · ${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${!m.is_admin ? ` <span style="cursor:pointer;color:var(--accent-red);margin-left:8px;" onclick="unsendChat(${m.id})" title="Unsend"><i class="fas fa-trash"></i></span>` : ''}</div></div>`).join('');
-        area.scrollTop = area.scrollHeight;
-      } catch { }
-    }
-    async function sendChatMsg() {
-      const user = Auth.getUser();
-      const inp = document.getElementById('chatInput');
-      const msg = inp.value.trim();
-      if (!msg) return;
-      if (!user) { showToast('Please login to use chat', 'error'); return; }
-      inp.value = '';
-      try { 
-        const res = await API.post('/chat', { message: msg }); 
-        const area = document.getElementById('chatMessages');
-        area.innerHTML += `<div class="chat-msg mine" id="msg-${res.id}">${msg}<div class="chat-msg-time">You · just now <span style="cursor:pointer;color:var(--accent-red);margin-left:8px;" onclick="unsendChat(${res.id})" title="Unsend"><i class="fas fa-trash"></i></span></div></div>`;
-        area.scrollTop = area.scrollHeight;
-      } catch { showToast('Failed to send message', 'error'); }
-    }
-    async function unsendChat(id) {
-      if(!confirm('Unsend this message?')) return;
-      try {
-        await API.delete('/chat/' + id);
-        document.getElementById('msg-'+id)?.remove();
-      } catch(e) { showToast(e.message, 'error'); }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
     }
 
-    /* ─── Logo Animation Effect ───────────────────────────────── */
-    function burstCarts(e, el) {
-      e.preventDefault();
-      if(el.isAnimating) return;
-      el.isAnimating = true;
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+      loadBestSellers();
+      loadReviews();
 
-      const img = el.querySelector('img');
-      const rect = img.getBoundingClientRect();
-
-      const clone = document.createElement('img');
-      clone.src = img.src;
-      clone.style.position = 'fixed';
-      clone.style.top = rect.top + 'px';
-      clone.style.left = rect.left + 'px';
-      clone.style.width = rect.width + 'px';
-      clone.style.height = rect.height + 'px';
-      clone.style.zIndex = '10000';
-      clone.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
-      document.body.appendChild(clone);
-
-      img.style.opacity = '0';
-
-      setTimeout(() => {
-        clone.classList.add('logo-burst-center');
-      }, 20);
-
-      setTimeout(() => {
-        clone.style.opacity = '0';
-        clone.style.transform = 'translate(-50%, -50%) scale(8)';
-        
-        for(let i=0; i<40; i++) {
-          const cart = document.createElement('div');
-          cart.className = 'burst-cart';
-          cart.innerHTML = '🛒';
-          document.body.appendChild(cart);
-          
-          const angle = Math.random() * Math.PI * 2;
-          const velocity = 15 + Math.random() * 25;
-          let vx = Math.cos(angle) * velocity;
-          let vy = Math.sin(angle) * velocity - 10;
-          let x = window.innerWidth / 2;
-          let y = window.innerHeight / 2;
-          let rot = Math.random() * 360;
-          const rotV = (Math.random() - 0.5) * 20;
-          let opacity = 1;
-          
-          function anim() {
-            vy += 0.8;
-            x += vx;
-            y += vy;
-            rot += rotV;
-            opacity -= 0.005;
-            
-            cart.style.left = x + 'px';
-            cart.style.top = y + 'px';
-            cart.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
-            cart.style.opacity = opacity;
-            
-            if(opacity > 0) requestAnimationFrame(anim);
-            else cart.remove();
+      // Mobile Bottom Nav Auto-hide logic (if enabled in css)
+      let lastScrollY = window.scrollY;
+      const bottomNav = document.querySelector('.mobile-bottom-nav');
+      if (bottomNav) {
+        window.addEventListener('scroll', () => {
+          if (window.scrollY > lastScrollY && window.scrollY > 100) {
+            bottomNav.style.transform = 'translateY(100%)';
+          } else {
+            bottomNav.style.transform = 'translateY(0)';
           }
-          requestAnimationFrame(anim);
-        }
-
-        setTimeout(() => {
-          clone.remove();
-          img.style.opacity = '1';
-          el.isAnimating = false;
-        }, 3500);
-      }, 900);
-    }
+          lastScrollY = window.scrollY;
+        }, { passive: true });
+      }
+    });
   </script>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
-      });
-    }
-  </script>
-<!-- ─── Mobile Bottom Navigation ─── -->
-<nav class="mobile-bottom-nav">
-  <a href="index.html" class="bottom-nav-item" id="bn-home">
-    <i class="fas fa-home"></i><span>Home</span>
-  </a>
-  <a href="shop.html" class="bottom-nav-item" id="bn-shop">
-    <i class="fas fa-store"></i><span>Shop</span>
-  </a>
-  <a href="shop.html?cart=1" class="bottom-nav-item" id="bn-cart">
-    <div style="position:relative;">
-      <i class="fas fa-shopping-bag"></i>
-      <span class="bottom-nav-badge" id="mobileCartCount">0</span>
-    </div>
-    <span>Cart</span>
-  </a>
-  <a href="buyer.html" class="bottom-nav-item" id="bn-profile">
-    <i class="fas fa-user-circle"></i><span>Profile</span>
-  </a>
-</nav>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const p = location.pathname;
-  if(p.includes('shop')) document.getElementById('bn-shop')?.classList.add('active');
-  else if(p.includes('buyer')||p.includes('seller')) document.getElementById('bn-profile')?.classList.add('active');
-  else document.getElementById('bn-home')?.classList.add('active');
-  
-  try {
-    const c = JSON.parse(localStorage.getItem('nirvana_cart')) || [];
-    const cnt = document.getElementById('mobileCartCount');
-    if(cnt) cnt.innerText = c.length;
-  } catch(e){}
-});
-</script>
+  <!-- Mobile Bottom Navigation -->
+  <div class="mobile-bottom-nav" style="display:none;">
+    <a href="index.html" class="mb-nav-item active">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="shop.html" class="mb-nav-item">
+      <i class="fas fa-search"></i>
+      <span>Shop</span>
+    </a>
+    <a href="register.html" class="mb-nav-item">
+      <i class="fas fa-plus-circle" style="font-size: 1.4rem; color: var(--accent-primary);"></i>
+      <span style="color: var(--accent-primary);">Sell</span>
+    </a>
+    <a href="buyer.html" class="mb-nav-item">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+  </div>
 </body>
-
 
 </html>
