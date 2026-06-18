@@ -122,6 +122,69 @@
       <span style="font-size:1.5rem;font-weight:800;color:var(--accent-primary);" id="cartTotal">₹0</span>
     </div>
     <button class="btn btn-primary btn-full" onclick="proceedCheckout()"><i class="fas fa-credit-card"></i> Checkout</button>
+</head>
+<body>
+<canvas id="particleCanvas"></canvas>
+<!-- Loader -->
+<div class="page-loader" id="pageLoader"><div class="loader-logo"><img src="LOGO.png" alt="Nirvana Mart" class="loader-logo-img"></div><div class="loader-bar"><div class="loader-bar-fill"></div></div></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-inner container">
+    <a href="index.html" class="nav-logo"><img src="LOGO.png" alt="Nirvana Mart" class="nav-logo-img"></a>
+    <div class="nav-search">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" id="searchInput" placeholder="Search products, services..." oninput="handleSearch(this.value)" autocomplete="off">
+      <div class="search-suggestions" id="searchSuggestions"></div>
+    </div>
+    <div class="nav-actions">
+      <button class="dark-toggle" id="darkModeToggle" title="Toggle Dark Mode"></button>
+      <div class="nav-icon-btn" id="wishlistBtn" onclick="openWishlistModal()" title="Wishlist" style="display:none;">
+        <i class="far fa-heart"></i>
+        <span class="nav-badge" id="wishlistBadge" style="display:none;">0</span>
+      </div>
+      <div class="nav-icon-btn" id="notifBtn" onclick="toggleNotifPanel(event)" title="Notifications" style="display:none; position:relative;">
+        <i class="fas fa-bell"></i>
+        <span class="nav-badge" id="notifBadge" style="display:none;">0</span>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-header"><span style="font-weight:700;">Notifications</span><button onclick="markAllRead(event)" style="font-size:0.78rem;color:var(--accent-primary);background:none;border:none;cursor:pointer;">Mark all read</button></div>
+          <div id="notifList" style="max-height:340px;overflow-y:auto;"></div>
+        </div>
+      </div>
+      <div class="nav-icon-btn" id="cartBtn" onclick="openCart()" title="Cart" style="display:none; position:relative;">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="nav-badge" id="cartBadge" style="display:none;">0</span>
+      </div>
+      <div id="guestNav" class="nav-actions" style="gap:8px;">
+        <a href="login.html" class="btn btn-ghost btn-sm">Login</a>
+        <a href="register.html" class="btn btn-primary btn-sm">Sign Up</a>
+      </div>
+      <div class="nav-icon-btn" id="userAvatarBtn" onclick="toggleUserMenu()" style="display:none;padding:0;cursor:pointer;position:relative;" title="Profile Menu">
+        <img id="userAvatarImg" src="" alt="User" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">
+        <div class="dropdown-panel" id="userDropdown">
+          <div class="dropdown-header"><div id="ddName" style="font-weight:700;"></div><div id="ddRole" style="font-size:0.8rem;color:var(--text-muted);text-transform:capitalize;"></div></div>
+          <div class="dropdown-item" onclick="goDashboard()"><div class="di-icon" style="background:rgba(99,102,241,0.1);">📊</div>Dashboard</div>
+          <div class="dropdown-item" onclick="Auth.logout()"><div class="di-icon" style="background:rgba(239,68,68,0.08);">🚪</div><span style="color:var(--accent-red)">Logout</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Cart Overlay & Drawer -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-drawer-header">
+    <h2 style="font-size:1.3rem;font-weight:800;">🛒 Your Cart</h2>
+    <button onclick="closeCart()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--text-muted);">✕</button>
+  </div>
+  <div class="cart-drawer-body" id="cartBody"><p style="text-align:center;padding:40px;color:var(--text-muted);">Your cart is empty</p></div>
+  <div class="cart-drawer-footer">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <span style="font-weight:700;">Total</span>
+      <span style="font-size:1.5rem;font-weight:800;color:var(--accent-primary);" id="cartTotal">₹0</span>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="proceedCheckout()"><i class="fas fa-credit-card"></i> Checkout</button>
   </div>
 </div>
 
@@ -129,6 +192,13 @@
 <main class="page-pad" style="min-height:80vh;padding-bottom:60px;">
   <div class="container" style="padding-top:40px;">
     <!-- Category bar (mobile) -->
+    <div class="mode-switcher-container" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:12px;margin-bottom:24px;display:flex;gap:10px;overflow-x:auto;box-shadow:0 10px 30px rgba(0,0,0,0.1);">
+      <button class="mode-btn active" id="mode-general" onclick="setMode('general')" style="padding:10px 20px;border-radius:12px;border:none;background:var(--accent-primary);color:white;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;"><i class="fas fa-store"></i> Normal Store</button>
+      <button class="mode-btn" id="mode-academic" onclick="setMode('academic')" style="padding:10px 20px;border-radius:12px;border:1px solid var(--border-color);background:transparent;color:var(--text-secondary);font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;"><i class="fas fa-book-reader"></i> Academic Corner</button>
+      <button class="mode-btn" id="mode-engineering" onclick="setMode('engineering')" style="padding:10px 20px;border-radius:12px;border:1px solid var(--border-color);background:transparent;color:var(--text-secondary);font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;"><i class="fas fa-drafting-compass"></i> Engineering Gear</button>
+      <button class="mode-btn" id="mode-hostel" onclick="setMode('hostel')" style="padding:10px 20px;border-radius:12px;border:1px solid var(--border-color);background:transparent;color:var(--text-secondary);font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;"><i class="fas fa-bed"></i> Hostel Essentials</button>
+    </div>
+    
     <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:16px;margin-bottom:24px;" id="mobileCatBar">
       <span class="cat-chip active" onclick="filterCat('all',this)"><i class="fas fa-fire" style="color:#ef4444;"></i> All</span>
       <span class="cat-chip" onclick="filterCat('electronics',this)"><i class="fas fa-laptop" style="color:#3b82f6;"></i> Electronics</span>
@@ -263,73 +333,6 @@
       <div class="form-group">
         <label class="form-label required">Product Image</label>
         <input type="file" id="pImageFile" class="form-control" accept="image/*" required>
-      </div>
-      <div class="form-group"><label class="form-label">Location on Campus</label><input type="text" id="pLocation" class="form-control" placeholder="North Campus, Hostel Block A..."></div>
-      <button type="submit" class="btn btn-primary btn-full" id="sellSubmitBtn"><i class="fas fa-check"></i> Submit for Approval</button>
-    </form>
-  </div>
-</div>
-
-<div id="toast-container"></div>
-<script src="shared/js/auth.js"></script>
-<script src="shared/js/api.js?v=2"></script>
-<script src="shared/js/effects.js"></script>
-<script>
-let allProducts = [], currentCat = 'all', cart = [], wishlist = [], currentProduct = null;
-let selectedPaymentMethod = null;
-let currentUser = null;
-
-document.addEventListener('DOMContentLoaded', async () => {
-  currentUser = Auth.getUser();
-  setupNav();
-  await loadAllProducts();
-  loadCart();
-  loadWishlist();
-  if (currentUser) loadNotifications();
-
-  // Check for category in URL
-  const params = new URLSearchParams(window.location.search);
-  const urlCat = params.get('cat');
-  if (urlCat) filterCat(urlCat, null);
-
-  if (window.innerWidth > 900) {
-    document.getElementById('desktopSidebar').style.display = 'block';
-  }
-});
-
-function setupNav() {
-  if (currentUser) {
-    document.getElementById('guestNav').style.display = 'none';
-    document.getElementById('wishlistBtn').style.display = 'flex';
-    document.getElementById('notifBtn').style.display = 'flex';
-    document.getElementById('cartBtn').style.display = 'flex';
-    document.getElementById('userAvatarBtn').style.display = 'flex';
-    document.getElementById('userAvatarImg').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=6366f1&color=fff`;
-    document.getElementById('ddName').textContent = currentUser.name;
-    document.getElementById('ddRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
-    if (currentUser.role === 'seller') document.getElementById('dropSellLink').style.display = 'flex';
-  }
-
-  // User menu toggle
-  document.getElementById('userAvatarBtn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.getElementById('userDropdown').classList.toggle('show');
-    document.getElementById('notifPanel').classList.remove('show');
-  });
-  document.addEventListener('click', () => {
-    document.getElementById('userDropdown').classList.remove('show');
-    document.getElementById('notifPanel').classList.remove('show');
-  });
-}
-
-async function loadAllProducts() {
-  try {
-    allProducts = await API.get('/products');
-    applyFilters();
-  } catch(e) {
-    document.getElementById('productsGrid').innerHTML = '<div class="empty-state"><span class="empty-state-icon"><i class="fas fa-wifi" style="font-size:3rem;"></i></span><div class="empty-state-title">Could Not Load Products</div><p class="empty-state-desc">Unable to reach the server. Make sure it is running and try again.</p><button class="btn btn-primary btn-sm" onclick="loadAllProducts()"><i class="fas fa-redo"></i> Retry</button></div>';
-  }
-}
 
 function applyFilters() {
   let filtered = [...allProducts];
@@ -922,7 +925,7 @@ async function unsendShopChat(id) {
   <a href="shop.html" class="bottom-nav-item" id="bn-shop">
     <i class="fas fa-store"></i><span>Shop</span>
   </a>
-  <a href="corners.html" class="bottom-nav-item" id="bn-corners">
+  <a href="shop.html" class="bottom-nav-item" id="bn-corners">
     <i class="fas fa-compass"></i><span>Corners</span>
   </a>
   <a href="shop.html?cart=1" class="bottom-nav-item" id="bn-cart">

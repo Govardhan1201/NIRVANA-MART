@@ -45,7 +45,7 @@
     <div style="flex:1"></div>
     <div class="nav-actions">
       <button class="dark-toggle" id="darkModeToggle"></button>
-      <a href="corners.html" class="btn btn-ghost btn-sm"><i class="fas fa-compass"></i> Corners</a>
+      <a href="shop.html" class="btn btn-ghost btn-sm"><i class="fas fa-compass"></i> Corners</a>
       <a href="shop.html" class="btn btn-ghost btn-sm"><i class="fas fa-store"></i> Browse</a>
       <button class="btn btn-ghost btn-sm" onclick="Auth.logout()">Logout</button>
     </div>
@@ -124,8 +124,9 @@
             <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:24px;">Fill out the form below. Admin will review and approve your listing.</p>
             <form id="sellForm" onsubmit="submitProduct(event)">
               <div class="form-group"><label class="form-label required">Product Title</label><input type="text" id="pTitle" class="form-control" placeholder="e.g., HP Laptop — Like New" required></div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
                 <div class="form-group"><label class="form-label required">Category</label><select id="pCategory" class="form-control" required><option value="electronics">Electronics</option><option value="books">Books &amp; Notes</option><option value="fashion">Fashion</option><option value="instruments">Instruments</option><option value="services">Services</option><option value="sports">Sports</option></select></div>
+                <div class="form-group"><label class="form-label required">Corner Tag</label><select id="pCorner" class="form-control" required><option value="general">None (General)</option><option value="academic">Academic Corner</option><option value="engineering">Engineering Corner</option><option value="hostel">Hostel Corner</option></select></div>
                 <div class="form-group"><label class="form-label required">Condition</label><select id="pCondition" class="form-control" required><option value="New">New (Unused)</option><option value="Like New">Like New</option><option value="Good">Good</option><option value="Fair">Fair</option></select></div>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
@@ -472,6 +473,7 @@
       await API.post('/products', {
         title: document.getElementById('pTitle').value,
         category: document.getElementById('pCategory').value,
+        corner: document.getElementById('pCorner').value,
         condition: document.getElementById('pCondition').value,
         price: parseFloat(document.getElementById('pPrice').value),
         originalPrice: document.getElementById('pOriginal').value || null,
@@ -547,7 +549,7 @@
   <a href="shop.html" class="bottom-nav-item" id="bn-shop">
     <i class="fas fa-store"></i><span>Shop</span>
   </a>
-  <a href="corners.html" class="bottom-nav-item" id="bn-corners">
+  <a href="shop.html" class="bottom-nav-item" id="bn-corners">
     <i class="fas fa-compass"></i><span>Corners</span>
   </a>
   <a href="shop.html?cart=1" class="bottom-nav-item" id="bn-cart">

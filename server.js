@@ -164,6 +164,7 @@ async function initDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
       category TEXT NOT NULL,
+      corner TEXT DEFAULT 'general',
       condition TEXT NOT NULL,
       price REAL NOT NULL,
       original_price REAL,
@@ -182,6 +183,7 @@ async function initDb() {
       rating REAL DEFAULT 4.5,
       created_at TEXT DEFAULT (datetime('now'))
     );
+
     CREATE TABLE IF NOT EXISTS orders (
       id TEXT PRIMARY KEY,
       product_id INTEGER,
@@ -309,6 +311,7 @@ async function initDb() {
     );
   `);
   try { await db.exec("ALTER TABLE products ADD COLUMN images_json TEXT DEFAULT '[]'"); } catch(e) {}
+  try { await db.exec("ALTER TABLE products ADD COLUMN corner TEXT DEFAULT 'general'"); } catch(e) {}
   await db.run('INSERT OR IGNORE INTO earnings (id) VALUES (1)');
 
   // Load NIRVANA data if student_data is empty
@@ -547,10 +550,11 @@ app.post('/api/auth/forgot-password/reset', async (req, res) => {
 // ─── PRODUCT ROUTES ───────────────────────────────────────────────────────────
 app.get('/api/products', async (req, res) => {
   try {
-    const { category, search } = req.query;
+    const { category, search, corner } = req.query;
     let sql = "SELECT * FROM products WHERE status = 'approved'";
     const params = [];
     if (category && category !== 'all') { sql += ' AND category = ?'; params.push(category); }
+    if (corner && corner !== 'general') { sql += ' AND corner = ?'; params.push(corner); }
     if (search) { sql += ' AND (title LIKE ? OR description LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
     sql += ' ORDER BY created_at DESC LIMIT 100';
     let rows = await db.all(sql, params);
@@ -583,12 +587,13 @@ app.get('/api/products/all', requireAdmin, async (req, res) => {
 app.post('/api/products', authenticate, async (req, res) => {
   try {
     if (req.user.role !== 'seller') return res.status(403).json({ error: 'Only sellers can list products' });
-    const { title, category, condition, price, originalPrice, quantity, description, imageUrl, imageUrls, location } = req.body;
+    const { title, category, condition, price, originalPrice, quantity, description, imageUrl, imageUrls, location, corner } = req.body;
     
     // Sanitize user inputs
     const safeTitle = htmlEscape(title);
     const safeDesc = htmlEscape(description);
     const safeLoc = htmlEscape(location);
+    const safeCorner = corner || 'general';
 
     // Support up to 5 images
     let imagesArr = [];
@@ -600,8 +605,8 @@ app.post('/api/products', authenticate, async (req, res) => {
     const primaryImage = imagesArr[0] || '';
     const imagesJson = JSON.stringify(imagesArr);
     const result = await db.run(
-      "INSERT INTO products (title,category,condition,price,original_price,quantity,description,image_url,images_json,location,seller_roll,seller_name,seller_phone,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'pending')",
-      [safeTitle, category, condition, price, originalPrice || null, quantity || 1, safeDesc, primaryImage, imagesJson, safeLoc || '', req.user.rollNumber, req.user.name, req.user.phone]
+      "INSERT INTO products (title,category,corner,condition,price,original_price,quantity,description,image_url,images_json,location,seller_roll,seller_name,seller_phone,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending')",
+      [safeTitle, category, safeCorner, condition, price, originalPrice || null, quantity || 1, safeDesc, primaryImage, imagesJson, safeLoc || '', req.user.rollNumber, req.user.name, req.user.phone]
     );
     const admin = await db.get("SELECT roll_number FROM users WHERE role = 'admin'");
     if (admin) await db.run('INSERT INTO notifications (user_roll,title,message) VALUES (?,?,?)', [admin.roll_number, '🆕 New Product Pending', `"${safeTitle}" by ${req.user.name} needs approval`]);
