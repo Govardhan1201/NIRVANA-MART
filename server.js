@@ -281,6 +281,32 @@ async function initDb() {
       comment TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now'))
     );
+    CREATE TABLE IF NOT EXISTS academic_resources (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'notes',
+      subject TEXT DEFAULT '',
+      semester TEXT DEFAULT '',
+      branch TEXT DEFAULT '',
+      file_url TEXT NOT NULL,
+      uploader_roll TEXT NOT NULL,
+      uploader_name TEXT NOT NULL,
+      downloads INTEGER DEFAULT 0,
+      is_approved INTEGER DEFAULT 1,
+      uploaded_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS ebooks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      author TEXT DEFAULT '',
+      subject TEXT DEFAULT '',
+      branch TEXT DEFAULT 'All',
+      cover_url TEXT DEFAULT '',
+      download_url TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      downloads INTEGER DEFAULT 0,
+      added_at TEXT DEFAULT (datetime('now'))
+    );
   `);
   try { await db.exec("ALTER TABLE products ADD COLUMN images_json TEXT DEFAULT '[]'"); } catch(e) {}
   await db.run('INSERT OR IGNORE INTO earnings (id) VALUES (1)');
@@ -734,6 +760,17 @@ app.post('/api/orders', authenticate, async (req, res) => {
 });
 
 // ─── CLOUDINARY UPLOAD ──────────────────────────────────────────────────────────
+// Raw document upload (PDF, PPT, DOC) for Academic Corner
+const uploadDoc = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['application/pdf','application/vnd.ms-powerpoint','application/vnd.openxmlformats-officedocument.presentationml.presentation','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (allowed.includes(file.mimetype) || file.originalname.match(/\.(pdf|ppt|pptx|doc|docx)$/i)) cb(null, true);
+    else cb(new Error('Only PDF, PPT, PPTX, DOC, DOCX files allowed'), false);
+  }
+});
+
 app.post('/api/upload', authenticate, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image provided' });
@@ -1232,6 +1269,115 @@ io.on('connection', (socket) => {
   });
 });
 
+// ─── ACADEMIC CORNER ─────────────────────────────────────────────────────────
+app.get('/api/academic', async (req, res) => {
+  try {
+    const { type, branch, semester, search } = req.query;
+    let sql = 'SELECT * FROM academic_resources WHERE is_approved = 1';
+    const params = [];
+    if (type && type !== 'all') { sql += ' AND type = ?'; params.push(type); }
+    if (branch && branch !== 'all') { sql += ' AND branch = ?'; params.push(branch); }
+    if (semester && semester !== 'all') { sql += ' AND semester = ?'; params.push(semester); }
+    if (search) { sql += ' AND (title LIKE ? OR subject LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
+    sql += ' ORDER BY uploaded_at DESC LIMIT 100';
+    res.json(await db.all(sql, params));
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/academic/upload-file', authenticate, uploadDoc.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file provided' });
+    const cloudinaryUpload = () => new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'nirvanamart-academic', resource_type: 'raw', use_filename: true, unique_filename: true },
+        (error, result) => { if (error) reject(error); else resolve(result); }
+      );
+      const s = require('stream');
+      const pass = new s.PassThrough();
+      pass.end(req.file.buffer);
+      pass.pipe(stream);
+    });
+    const result = await cloudinaryUpload();
+    res.json({ success: true, url: result.secure_url });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/academic', authenticate, async (req, res) => {
+  try {
+    const { title, type, subject, semester, branch, file_url } = req.body;
+    if (!title || !file_url) return res.status(400).json({ error: 'Title and file are required' });
+    const safeTitle = htmlEscape(title);
+    const safeSubject = htmlEscape(subject || '');
+    const result = await db.run(
+      'INSERT INTO academic_resources (title,type,subject,semester,branch,file_url,uploader_roll,uploader_name) VALUES (?,?,?,?,?,?,?,?)',
+      [safeTitle, type||'notes', safeSubject, semester||'', branch||'', file_url, req.user.rollNumber, req.user.name]
+    );
+    res.json({ id: result.lastID, success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/academic/:id/download', async (req, res) => {
+  try {
+    await db.run('UPDATE academic_resources SET downloads = downloads + 1 WHERE id = ?', [req.params.id]);
+    const resource = await db.get('SELECT file_url FROM academic_resources WHERE id = ?', [req.params.id]);
+    res.json({ success: true, url: resource?.file_url });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/academic/:id', authenticate, async (req, res) => {
+  try {
+    const resource = await db.get('SELECT * FROM academic_resources WHERE id = ?', [req.params.id]);
+    if (!resource) return res.status(404).json({ error: 'Not found' });
+    if (resource.uploader_roll !== req.user.rollNumber && req.user.role !== 'admin')
+      return res.status(403).json({ error: 'Not authorised' });
+    await db.run('DELETE FROM academic_resources WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ─── FREE E-BOOKS ─────────────────────────────────────────────────────────────
+app.get('/api/ebooks', async (req, res) => {
+  try {
+    const { branch, subject, search } = req.query;
+    let sql = 'SELECT * FROM ebooks';
+    const params = [];
+    const conditions = [];
+    if (branch && branch !== 'all') { conditions.push('(branch = ? OR branch = \'All\')'); params.push(branch); }
+    if (subject) { conditions.push('subject LIKE ?'); params.push(`%${subject}%`); }
+    if (search) { conditions.push('(title LIKE ? OR author LIKE ? OR subject LIKE ?)'); params.push(`%${search}%`, `%${search}%`, `%${search}%`); }
+    if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+    sql += ' ORDER BY added_at DESC LIMIT 100';
+    res.json(await db.all(sql, params));
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/ebooks', requireAdmin, async (req, res) => {
+  try {
+    const { title, author, subject, branch, cover_url, download_url, description } = req.body;
+    if (!title || !download_url) return res.status(400).json({ error: 'Title and download URL are required' });
+    const result = await db.run(
+      'INSERT INTO ebooks (title,author,subject,branch,cover_url,download_url,description) VALUES (?,?,?,?,?,?,?)',
+      [htmlEscape(title), author||'', subject||'', branch||'All', cover_url||'', download_url, htmlEscape(description||'')]
+    );
+    res.json({ id: result.lastID, success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/ebooks/:id/download', async (req, res) => {
+  try {
+    await db.run('UPDATE ebooks SET downloads = downloads + 1 WHERE id = ?', [req.params.id]);
+    const book = await db.get('SELECT download_url FROM ebooks WHERE id = ?', [req.params.id]);
+    res.json({ success: true, url: book?.download_url });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/ebooks/:id', requireAdmin, async (req, res) => {
+  try {
+    await db.run('DELETE FROM ebooks WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ─── BEST SELLERS (sorted by order count) ────────────────────────────────────
 app.get('/api/products/bestsellers', async (req, res) => {
   try {
@@ -1245,7 +1391,7 @@ app.get('/api/products/bestsellers', async (req, res) => {
 });
 
 // ─── Static File Serving ──────────────────────────────────────────────────────
-const pages = ['index', 'shop', 'login', 'register', 'buyer', 'seller'];
+const pages = ['index', 'shop', 'login', 'register', 'buyer', 'seller', 'corners', 'ebooks'];
 pages.forEach(p => {
   app.get(`/${p === 'index' ? '' : p}`, (req, res) =>
     res.sendFile(path.join(__dirname, p === 'index' ? 'index.html' : `${p}.html`)));

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free E-Books — Nirvana Mart Campus Library</title>
+  <meta name="description" content="Free e-books for engineering students. Download textbooks, reference books and study materials — no login required.">
+  <link rel="stylesheet" href="shared/css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .ebooks-hero {
+      background: linear-gradient(135deg, #0f0f1a 0%, #1a1035 40%, #0f1a25 100%);
+      padding: 110px 0 70px; text-align: center; position: relative; overflow: hidden;
+    }
+    .ebooks-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 0%, rgba(16,185,129,0.2), transparent);
+    }
+    .ebooks-hero::after {
+      content: '📚'; position: absolute; right: 8%; top: 50%; transform: translateY(-50%);
+      font-size: clamp(5rem,12vw,10rem); opacity: 0.08; pointer-events: none;
+    }
+    .ebooks-hero h1 { font-size: clamp(2rem,5vw,3.5rem); font-weight: 800; color: #fff; position: relative; margin-bottom: 14px; }
+    .ebooks-hero .highlight { background: linear-gradient(135deg,#34d399,#6366f1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .ebooks-hero p { color: rgba(255,255,255,0.65); font-size: 1.05rem; position: relative; margin-bottom: 30px; }
+    .public-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 30px; padding: 7px 18px; font-size: 0.82rem;
+      font-weight: 700; color: #34d399; letter-spacing: 1px;
+      text-transform: uppercase; margin-bottom: 20px; position: relative;
+    }
+
+    /* ── Search & Filters ── */
+    .ebooks-search-wrap {
+      max-width: 640px; margin: -28px auto 0; position: relative; z-index: 10; padding: 0 16px;
+    }
+    .ebooks-search-box {
+      display: flex; align-items: center; gap: 0;
+      background: var(--bg-card); border: 1.5px solid var(--border-color);
+      border-radius: 50px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .ebooks-search-box i { padding: 0 16px; color: var(--text-muted); font-size: 1rem; }
+    .ebooks-search-box input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text-primary); font-size: 0.95rem; padding: 16px 0;
+    }
+    .ebooks-search-box button {
+      background: #10b981; color: #fff; border: none;
+      padding: 16px 26px; font-weight: 700; cursor: pointer;
+      font-size: 0.88rem; transition: background 0.2s;
+    }
+    .ebooks-search-box button:hover { background: #059669; }
+
+    /* ── Filter Chips ── */
+    .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .filter-chip {
+      padding: 7px 16px; border-radius: 50px; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; border: 1.5px solid var(--border-color);
+      color: var(--text-secondary); background: var(--bg-card); transition: all 0.2s;
+    }
+    .filter-chip.active { background: #10b981; color: #fff; border-color: #10b981; }
+    .filter-chip:hover:not(.active) { border-color: #10b981; color: #10b981; transform: translateY(-1px); }
+
+    /* ── E-Book Cards ── */
+    .ebooks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 24px; }
+
+    .ebook-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 20px; overflow: hidden; transition: all 0.28s;
+      display: flex; flex-direction: column; position: relative;
+    }
+    .ebook-card:hover { transform: translateY(-6px); box-shadow: 0 16px 50px rgba(0,0,0,0.4); border-color: rgba(16,185,129,0.35); }
+
+    .ebook-cover {
+      width: 100%; height: 200px; object-fit: cover;
+      background: linear-gradient(135deg, #1e1e3a, #0f2020);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .ebook-cover-placeholder {
+      width: 100%; height: 200px;
+      background: linear-gradient(135deg, #1a1035, #0f2020);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; color: rgba(255,255,255,0.3);
+    }
+    .ebook-cover-placeholder i { font-size: 3rem; }
+    .ebook-cover-placeholder span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+
+    .ebook-body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .ebook-title { font-weight: 800; font-size: 0.92rem; color: var(--text-primary); line-height: 1.35; }
+    .ebook-author { font-size: 0.78rem; color: var(--text-muted); }
+    .ebook-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .ebook-tag {
+      font-size: 0.7rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px; background: rgba(16,185,129,0.12); color: #10b981;
+    }
+    .ebook-tag.branch { background: rgba(99,102,241,0.12); color: #6366f1; }
+    .ebook-desc { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-top: 4px; }
+    .ebook-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color); }
+    .ebook-downloads { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .btn-free-download {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 700;
+      background: rgba(16,185,129,0.15); color: #10b981;
+      border: 1.5px solid rgba(16,185,129,0.3); cursor: pointer; transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-free-download:hover { background: #10b981; color: #fff; transform: scale(1.04); }
+    .free-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: #10b981; color: #fff; font-size: 0.68rem;
+      font-weight: 800; padding: 4px 10px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    /* ── Stats Banner ── */
+    .ebooks-stats {
+      display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+      padding: 28px 0 16px;
+    }
+    .ebook-stat { text-align: center; }
+    .ebook-stat-val { font-size: 2rem; font-weight: 800; color: #10b981; }
+    .ebook-stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* ── Empty / Loading ── */
+    .empty-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+    .empty-state i { font-size: 4rem; opacity: 0.25; display: block; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 8px; }
+
+    /* ── Suggest Banner ── */
+    .suggest-banner {
+      background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(99,102,241,0.08));
+      border: 1px solid rgba(16,185,129,0.2); border-radius: 20px;
+      padding: 28px 32px; text-align: center; margin-top: 48px;
+    }
+    .suggest-banner h3 { font-weight: 800; font-size: 1.15rem; margin-bottom: 8px; }
+    .suggest-banner p { color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 20px; }
+
+    /* ── Sample ebooks seeded in DOM (shown when API empty) ── */
+    .sample-books-info {
+      background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 16px; padding: 16px 24px; margin-bottom: 28px;
+      font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .ebooks-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .ebook-cover, .ebook-cover-placeholder { height: 140px; }
+    }
+    @media (max-width: 400px) {
+      .ebooks-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="logo-icon">🎓</span>
+        <span class="logo-text">Nirvana <span class="logo-mart">Mart</span></span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="shop.html" class="nav-link">Shop</a>
+        <a href="corners.html" class="nav-link">Corners</a>
+        <a href="ebooks.html" class="nav-link active">📚 Free E-Books</a>
+      </div>
+      <div class="nav-actions">
+        <a href="shop.html?cart=1" class="nav-btn btn-ghost"><i class="fas fa-shopping-bag"></i></a>
+        <a href="buyer.html" class="nav-btn btn-primary">Dashboard</a>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="ebooks-hero">
+    <div class="container">
+      <div class="public-badge"><i class="fas fa-unlock"></i> 100% Free — No Login Required</div>
+      <h1>Campus <span class="highlight">E-Library</span></h1>
+      <p>Download textbooks, reference books and study materials — completely free for all students</p>
+    </div>
+  </section>
+
+  <!-- Search -->
+  <div class="ebooks-search-wrap">
+    <div class="ebooks-search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="ebookSearch" placeholder="Search by title, author or subject..." oninput="loadEbooks()">
+      <button onclick="loadEbooks()">Search</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <main class="container" style="padding-top:50px;padding-bottom:100px;">
+
+    <!-- Stats -->
+    <div class="ebooks-stats" id="ebooksStats">
+      <div class="ebook-stat"><div class="ebook-stat-val" id="statTotal">—</div><div class="ebook-stat-label">Books Available</div></div>
+      <div class="ebook-stat"><div class="ebook-stat-val" id="statDownloads">—</div><div class="ebook-stat-label">Total Downloads</div></div>
+      <div class="ebook-stat"><div class="ebook-stat-val">Free</div><div class="ebook-stat-label">Always</div></div>
+    </div>
+
+    <!-- Info -->
+    <div class="sample-books-info">
+      <i class="fas fa-info-circle" style="color:#6366f1;font-size:1.2rem;flex-shrink:0;"></i>
+      <span>Books are curated and added by the Nirvana Mart admin. All links point to legitimate free sources (archive.org, NPTEL, publisher free editions). <strong>Admin can add new books from the admin panel.</strong></span>
+    </div>
+
+    <!-- Branch Filters -->
+    <div class="filter-chips" id="branchFilters">
+      <span class="filter-chip active" data-branch="all" onclick="filterByBranch(this,'all')">📚 All Books</span>
+      <span class="filter-chip" data-branch="CSE" onclick="filterByBranch(this,'CSE')">💻 CSE / IT</span>
+      <span class="filter-chip" data-branch="ECE" onclick="filterByBranch(this,'ECE')">📡 ECE</span>
+      <span class="filter-chip" data-branch="EEE" onclick="filterByBranch(this,'EEE')">⚡ EEE</span>
+      <span class="filter-chip" data-branch="MECH" onclick="filterByBranch(this,'MECH')">⚙️ MECH</span>
+      <span class="filter-chip" data-branch="CIVIL" onclick="filterByBranch(this,'CIVIL')">🏗️ CIVIL</span>
+      <span class="filter-chip" data-branch="All" onclick="filterByBranch(this,'All')">🌐 Common</span>
+    </div>
+
+    <!-- Grid -->
+    <div class="ebooks-grid" id="ebooksGrid">
+      <div class="empty-state" style="grid-column:1/-1">
+        <i class="fas fa-spinner fa-spin"></i>
+        <h3>Loading books...</h3>
+      </div>
+    </div>
+
+    <!-- Suggest Banner -->
+    <div class="suggest-banner">
+      <h3>📖 Know a great free resource?</h3>
+      <p>Contact the Nirvana Mart admin to suggest a book or study material to be added to the campus library.</p>
+      <a href="index.html#contact" class="btn btn-primary" style="background:#10b981;border-color:#10b981;">
+        <i class="fas fa-paper-plane"></i> Suggest a Book
+      </a>
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="shop.html" class="bottom-nav-item"><i class="fas fa-store"></i><span>Shop</span></a>
+    <a href="corners.html" class="bottom-nav-item"><i class="fas fa-compass"></i><span>Corners</span></a>
+    <a href="ebooks.html" class="bottom-nav-item active"><i class="fas fa-book"></i><span>E-Books</span></a>
+    <a href="buyer.html" class="bottom-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+  </nav>
+
+  <script>
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+  });
+  document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+
+  // Fallback sample books (shown when DB is empty — admin should add real ones)
+  const SAMPLE_BOOKS = [
+    { id: 's1', title: 'Introduction to Algorithms (CLRS)', author: 'Cormen, Leiserson, Rivest, Stein', subject: 'Data Structures & Algorithms', branch: 'CSE', cover_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=300', download_url: 'https://archive.org/details/introduction-to-algorithms-third-edition', description: 'The definitive reference for algorithms. Covers sorting, graphs, dynamic programming and more.', downloads: 1240 },
+    { id: 's2', title: 'Engineering Mathematics — B.S. Grewal', author: 'B.S. Grewal', subject: 'Engineering Mathematics', branch: 'All', cover_url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=300', download_url: 'https://archive.org/search?query=engineering+mathematics+grewal', description: 'The most widely used engineering mathematics textbook across all branches in India.', downloads: 3820 },
+    { id: 's3', title: 'Database System Concepts', author: 'Silberschatz, Korth, Sudarshan', subject: 'Database Management Systems', branch: 'CSE', cover_url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300', download_url: 'https://db-book.com/', description: 'Comprehensive coverage of database concepts, SQL, normalization, and transaction management.', downloads: 967 },
+    { id: 's4', title: 'Signals and Systems', author: 'Alan V. Oppenheim', subject: 'Signals & Systems', branch: 'ECE', cover_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=300', download_url: 'https://archive.org/search?query=oppenheim+signals+systems', description: 'Fundamental treatment of signals, systems, and signal processing for ECE students.', downloads: 734 },
+    { id: 's5', title: 'Electrical Machines — I.J. Nagrath', author: 'I.J. Nagrath & D.P. Kothari', subject: 'Electrical Machines', branch: 'EEE', cover_url: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=300', download_url: 'https://archive.org/search?query=nagrath+electrical+machines', description: 'Essential textbook covering DC and AC machines for EEE and allied branches.', downloads: 612 },
+    { id: 's6', title: 'Strength of Materials — R.K. Bansal', author: 'R.K. Bansal', subject: 'Strength of Materials', branch: 'MECH', cover_url: 'https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=300', download_url: 'https://archive.org/search?query=strength+materials+bansal', description: 'A textbook of Strength of Materials covering stress, strain, beams and torsion in detail.', downloads: 891 },
+    { id: 's7', title: 'Fluid Mechanics & Hydraulics', author: 'Modi & Seth', subject: 'Fluid Mechanics', branch: 'CIVIL', cover_url: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=300', download_url: 'https://archive.org/search?query=fluid+mechanics+modi+seth', description: 'Widely recommended text for Civil & Mechanical students covering fluid statics, dynamics.', downloads: 556 },
+    { id: 's8', title: 'Operating System Concepts', author: 'Silberschatz, Galvin, Gagne', subject: 'Operating Systems', branch: 'CSE', cover_url: 'https://images.unsplash.com/photo-1629654291663-b91ad427698f?w=300', download_url: 'https://os-book.com/', description: 'The "Dinosaur Book" — the standard OS textbook covering processes, memory, file systems.', downloads: 1105 },
+  ];
+
+  let currentBranch = 'all';
+  let allBooks = [];
+
+  async function loadEbooks() {
+    const search = document.getElementById('ebookSearch').value.trim();
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (currentBranch !== 'all') params.append('branch', currentBranch);
+
+    try {
+      const res = await fetch(`/api/ebooks?${params}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        allBooks = data;
+        renderBooks(data);
+        updateStats(data);
+      } else {
+        // Show sample books when DB is empty
+        const filtered = currentBranch === 'all' ? SAMPLE_BOOKS :
+          SAMPLE_BOOKS.filter(b => b.branch === currentBranch || b.branch === 'All');
+        const searched = search ? filtered.filter(b =>
+          b.title.toLowerCase().includes(search.toLowerCase()) ||
+          b.author.toLowerCase().includes(search.toLowerCase()) ||
+          b.subject.toLowerCase().includes(search.toLowerCase())
+        ) : filtered;
+        allBooks = searched;
+        renderBooks(searched);
+        updateStats(searched);
+      }
+    } catch {
+      renderBooks(SAMPLE_BOOKS);
+      updateStats(SAMPLE_BOOKS);
+    }
+  }
+
+  function filterByBranch(chip, branch) {
+    currentBranch = branch;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    loadEbooks();
+  }
+
+  function updateStats(books) {
+    document.getElementById('statTotal').textContent = books.length;
+    const totalDl = books.reduce((s, b) => s + (b.downloads || 0), 0);
+    document.getElementById('statDownloads').textContent = totalDl >= 1000 ? (totalDl/1000).toFixed(1) + 'k' : totalDl;
+  }
+
+  function renderBooks(books) {
+    const grid = document.getElementById('ebooksGrid');
+    if (!books.length) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <i class="fas fa-book-open"></i>
+          <h3>No books found</h3>
+          <p>Try a different search or filter. Admin can add books from the admin panel.</p>
+        </div>`;
+      return;
+    }
+    grid.innerHTML = books.map(book => {
+      const isReal = typeof book.id === 'number';
+      const coverHtml = book.cover_url
+        ? `<img src="${book.cover_url}" alt="${book.title}" class="ebook-cover" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'ebook-cover-placeholder\\'><i class=\\'fas fa-book\\'></i><span>${book.subject || 'E-Book'}</span></div>'">`
+        : `<div class="ebook-cover-placeholder"><i class="fas fa-book"></i><span>${book.subject || 'E-Book'}</span></div>`;
+      return `
+        <div class="ebook-card">
+          <span class="free-badge">FREE</span>
+          ${coverHtml}
+          <div class="ebook-body">
+            <div class="ebook-title">${book.title}</div>
+            ${book.author ? `<div class="ebook-author">by ${book.author}</div>` : ''}
+            <div class="ebook-tags">
+              ${book.subject ? `<span class="ebook-tag">${book.subject}</span>` : ''}
+              ${book.branch && book.branch !== 'All' ? `<span class="ebook-tag branch">${book.branch}</span>` : ''}
+              ${book.branch === 'All' ? `<span class="ebook-tag branch">All Branches</span>` : ''}
+            </div>
+            ${book.description ? `<div class="ebook-desc">${book.description.slice(0,100)}${book.description.length>100?'…':''}</div>` : ''}
+            <div class="ebook-footer">
+              <div class="ebook-downloads"><i class="fas fa-download"></i> ${(book.downloads||0).toLocaleString()}</div>
+              <a href="#" class="btn-free-download" onclick="handleDownload(event,'${book.id}','${book.download_url}')">
+                <i class="fas fa-download"></i> Free
+              </a>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function handleDownload(e, id, url) {
+    e.preventDefault();
+    // Increment counter only for real DB books
+    if (!String(id).startsWith('s')) {
+      try { await fetch(`/api/ebooks/${id}/download`, { method: 'PUT' }); } catch {}
+    }
+    window.open(url, '_blank', 'noopener');
+    // Reload to update counts
+    setTimeout(loadEbooks, 600);
+  }
+
+  document.addEventListener('DOMContentLoaded', loadEbooks);
+  </script>
+</body>
+</html>
