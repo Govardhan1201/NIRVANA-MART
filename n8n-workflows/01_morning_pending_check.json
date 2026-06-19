@@ -16,11 +16,11 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $vars.NIRVANA_BASE_URL }}/products/pending",
+        "url": "={{ $env.NIRVANA_BASE_URL }}/products/pending",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $vars.ADMIN_TOKEN }}" }
+            { "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }
           ]
         },
         "options": { "response": { "response": { "neverError": true } } }
@@ -78,13 +78,13 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $vars.ADMIN_EMAIL }}\"],\n  \"subject\": \"{{ $json.subject }}\",\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $env.ADMIN_EMAIL }}\"],\n  \"subject\": \"{{ $json.subject }}\",\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
         "options": {}
       },
       "id": "n01-email",

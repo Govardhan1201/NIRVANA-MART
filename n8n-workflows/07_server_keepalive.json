@@ -65,13 +65,13 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART Alerts <onboarding@resend.dev>\",\n  \"to\": [\"{{ $vars.ADMIN_EMAIL }}\"],\n  \"subject\": \"🚨 NIRVANA MART Server Possibly Down!\",\n  \"html\": \"<div style='font-family:sans-serif;max-width:500px;margin:0 auto;'><div style='background:#dc2626;padding:24px;border-radius:10px;text-align:center;color:white;'><h1 style='margin:0;'>🚨 Server Alert</h1><p style='margin:8px 0 0;opacity:0.85;'>Detected at {{ $json.timestamp }}</p></div><div style='background:white;border:1px solid #fecaca;padding:20px;border-radius:0 0 10px 10px;'><p>The NIRVANA MART server returned an unexpected response. It may be down or having issues.</p><p><strong>Check:</strong> <a href='https://nirvana-mart.onrender.com'>https://nirvana-mart.onrender.com</a></p><p><strong>Admin Panel:</strong> <a href='https://dashboard.render.com'>Render Dashboard</a></p></div></div>\"\n}",
+        "jsonBody": "={\n  \"from\": \"NIRVANA MART Alerts <onboarding@resend.dev>\",\n  \"to\": [\"{{ $env.ADMIN_EMAIL }}\"],\n  \"subject\": \"🚨 NIRVANA MART Server Possibly Down!\",\n  \"html\": \"<div style='font-family:sans-serif;max-width:500px;margin:0 auto;'><div style='background:#dc2626;padding:24px;border-radius:10px;text-align:center;color:white;'><h1 style='margin:0;'>🚨 Server Alert</h1><p style='margin:8px 0 0;opacity:0.85;'>Detected at {{ $json.timestamp }}</p></div><div style='background:white;border:1px solid #fecaca;padding:20px;border-radius:0 0 10px 10px;'><p>The NIRVANA MART server returned an unexpected response. It may be down or having issues.</p><p><strong>Check:</strong> <a href='https://nirvana-mart.onrender.com'>https://nirvana-mart.onrender.com</a></p><p><strong>Admin Panel:</strong> <a href='https://dashboard.render.com'>Render Dashboard</a></p></div></div>\"\n}",
         "options": {}
       },
       "id": "n07-alert-email",
@@ -83,7 +83,7 @@
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "value": "={{ $vars.GOOGLE_SHEETS_ID }}", "__rl": true, "mode": "id" },
+        "documentId": { "value": "={{ $env.GOOGLE_SHEETS_ID }}", "__rl": true, "mode": "id" },
         "sheetName": { "value": "Uptime Log", "__rl": true, "mode": "name" },
         "columns": {
           "mappingMode": "defineBelow",

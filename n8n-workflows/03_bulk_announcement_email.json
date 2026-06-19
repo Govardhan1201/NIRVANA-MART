@@ -25,10 +25,10 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $vars.NIRVANA_BASE_URL }}/users",
+        "url": "={{ $env.NIRVANA_BASE_URL }}/users",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $vars.ADMIN_TOKEN }}" }]
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }]
         },
         "options": {}
       },
@@ -66,7 +66,7 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },

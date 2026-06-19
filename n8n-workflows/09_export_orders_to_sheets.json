@@ -12,10 +12,10 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $vars.NIRVANA_BASE_URL }}/orders",
+        "url": "={{ $env.NIRVANA_BASE_URL }}/orders",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $vars.ADMIN_TOKEN }}" }]
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }]
         },
         "options": {}
       },
@@ -38,7 +38,7 @@
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "value": "={{ $vars.GOOGLE_SHEETS_ID }}", "__rl": true, "mode": "id" },
+        "documentId": { "value": "={{ $env.GOOGLE_SHEETS_ID }}", "__rl": true, "mode": "id" },
         "sheetName": { "value": "All Orders", "__rl": true, "mode": "name" },
         "columns": {
           "mappingMode": "defineBelow",
@@ -70,13 +70,13 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $vars.ADMIN_EMAIL }}\"],\n  \"subject\": \"✅ Orders exported to Google Sheets successfully\",\n  \"html\": \"<div style='font-family:sans-serif;padding:24px;'><h2 style='color:#10b981;'>✅ Export Complete!</h2><p>All NIRVANA MART orders have been successfully exported to your Google Sheet.</p><p><a href='https://docs.google.com/spreadsheets/d/{{ $vars.GOOGLE_SHEETS_ID }}' style='color:#c8923a;font-weight:700;'>Open Google Sheet →</a></p></div>\"\n}",
+        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $env.ADMIN_EMAIL }}\"],\n  \"subject\": \"✅ Orders exported to Google Sheets successfully\",\n  \"html\": \"<div style='font-family:sans-serif;padding:24px;'><h2 style='color:#10b981;'>✅ Export Complete!</h2><p>All NIRVANA MART orders have been successfully exported to your Google Sheet.</p><p><a href='https://docs.google.com/spreadsheets/d/{{ $env.GOOGLE_SHEETS_ID }}' style='color:#c8923a;font-weight:700;'>Open Google Sheet →</a></p></div>\"\n}",
         "options": {}
       },
       "id": "n09-notify",

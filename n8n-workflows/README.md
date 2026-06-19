@@ -23,17 +23,19 @@
 
 ## ⚙️ Setup — Step by Step
 
-### Step 1: Set n8n Variables
+### Step 1: Run n8n with Environment Variables (Docker)
 
-In your n8n dashboard, go to **Settings → Variables** and create these:
+Since self-hosted/Docker instances of n8n do not have the paid **Variables** settings menu, we use **Docker Environment Variables** instead. n8n will automatically read these in the workflows.
 
-| Variable Name | Value | Description |
-|--------------|-------|-------------|
-| `NIRVANA_BASE_URL` | `https://nirvana-mart.onrender.com/api` | Your backend API base URL |
-| `ADMIN_TOKEN` | Your JWT admin token | Get from browser DevTools after logging in |
-| `RESEND_API_KEY` | `re_RpQ9xkb1_...` | Your Resend API key (already in .env) |
-| `ADMIN_EMAIL` | `your@email.com` | Where admin alerts go |
-| `GOOGLE_SHEETS_ID` | `1BxiM...` | Google Sheet ID from the URL |
+To do this, stop your current n8n container and start a new one with the variables configured.
+
+Run this command in PowerShell or Command Prompt (replace the values with your own keys/details):
+
+```bash
+docker stop n8n
+docker rm n8n
+docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n -e NIRVANA_BASE_URL="https://nirvana-mart.onrender.com/api" -e ADMIN_TOKEN="your_jwt_admin_token" -e RESEND_API_KEY="your_resend_api_key" -e ADMIN_EMAIL="your_email@example.com" -e GOOGLE_SHEETS_ID="your_google_sheets_id" n8nio/n8n
+```
 
 > **How to get ADMIN_TOKEN:** Log into the admin panel in Chrome → F12 → Application → Local Storage → copy `vm_token`
 
@@ -58,7 +60,7 @@ In your n8n dashboard, go to **Settings → Variables** and create these:
    - `All Orders`
 3. Copy the Sheet ID from the URL: `https://docs.google.com/spreadsheets/d/**THIS_PART**/edit`
 4. In n8n, add **Google Sheets OAuth2** credentials
-5. Set the `GOOGLE_SHEETS_ID` variable
+5. Make sure the `GOOGLE_SHEETS_ID` env variable was passed during Docker container startup (Step 1)
 
 ---
 
