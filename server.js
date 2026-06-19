@@ -479,7 +479,7 @@ app.post('/api/auth/admin-login', loginLimiter, async (req, res) => {
       const hash = await bcrypt.hash(ADMIN_PASSWORD, 10);
       const result = await db.run(
         'INSERT INTO users (name,roll_number,branch,year,phone,email,password_hash,role) VALUES (?,?,?,?,?,?,?,?)',
-        ['Admin', 'ADMIN001', 'Admin', '0', '0000000000', 'admin@nirvanamart.com', hash, 'admin']
+        ['Admin', 'ADMIN001', 'Admin', '0', '0000000000', 'nirvanamart0@gmail.com', hash, 'admin']
       );
       adminUser = await db.get('SELECT * FROM users WHERE id = ?', [result.lastID]);
     }
