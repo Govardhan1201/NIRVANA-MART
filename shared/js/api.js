@@ -9,10 +9,24 @@ async function _fetch(path, options = {}) {
   const token = getToken();
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(API_BASE + path, { ...options, headers });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);
-  return data;
+
+  // Timeout: 25s for first load (server may be cold-starting on free hosting)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+  try {
+    const res = await fetch(API_BASE + path, { ...options, headers, signal: controller.signal });
+    clearTimeout(timeoutId);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);
+    return data;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Server is waking up — please wait a moment and try again.');
+    }
+    throw err;
+  }
 }
 
 const API = {

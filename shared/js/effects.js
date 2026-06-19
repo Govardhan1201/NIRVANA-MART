@@ -1,4 +1,4 @@
-﻿// NIRVANA MART 3.0 — Premium Visual Effects Engine
+// NIRVANA MART 3.0 — Premium Visual Effects Engine
 // Particle Canvas, Custom Cursor, Scroll Reveal, Dark Mode, Modal, Toast
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -100,8 +100,9 @@ function initParticles() {
 function initPageLoader() {
   const loader = document.querySelector('.page-loader');
   if (!loader) return;
-  window.addEventListener('load', () => { setTimeout(() => loader.classList.add('fade-out'), 500); });
-  setTimeout(() => loader.classList.add('fade-out'), 2200);
+  window.addEventListener('load', () => { setTimeout(() => loader.classList.add('fade-out'), 300); });
+  // Hard fallback: always dismiss after 800ms so pages never appear stuck
+  setTimeout(() => loader.classList.add('fade-out'), 800);
 }
 
 // ─── Custom Cursor ─────────────────────────────────────────────
