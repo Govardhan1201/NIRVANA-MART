@@ -34,7 +34,7 @@ Run this command in PowerShell or Command Prompt (replace the values with your o
 ```bash
 docker stop n8n
 docker rm n8n
-docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n -e NIRVANA_BASE_URL="https://nirvana-mart.onrender.com/api" -e ADMIN_TOKEN="your_jwt_admin_token" -e RESEND_API_KEY="your_resend_api_key" -e ADMIN_EMAIL="your_email@example.com" -e GOOGLE_SHEETS_ID="your_google_sheets_id" n8nio/n8n
+docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n -e NIRVANA_BASE_URL="https://nirvana-mart.onrender.com/api" -e ADMIN_TOKEN="your_jwt_admin_token" -e RESEND_API_KEY="your_resend_api_key" -e ADMIN_EMAIL="nirvanamart0@gmail.com" -e GOOGLE_SHEETS_ID="your_google_sheets_id" n8nio/n8n
 ```
 
 > **How to get ADMIN_TOKEN:** Log into the admin panel in Chrome → F12 → Application → Local Storage → copy `vm_token`
