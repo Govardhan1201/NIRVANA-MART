@@ -1,0 +1,113 @@
+{
+  "name": "06 - Product Approved or Rejected Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nirvana-product-status",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "n06-trigger",
+      "name": "Webhook: Product Status Changed",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "nirvana-product-status"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\": \"ok\"}"
+      },
+      "id": "n06-respond",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [420, 160]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "c06",
+              "leftValue": "={{ $json.body.status }}",
+              "rightValue": "approved",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "n06-switch",
+      "name": "Approved or Rejected?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [440, 340]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $('Webhook: Product Status Changed').first().json.body.seller_email }}\"],\n  \"subject\": \"🎉 Your listing is LIVE on NIRVANA MART!\",\n  \"html\": \"<div style='font-family:Segoe UI,sans-serif;max-width:600px;margin:0 auto;background:#f5f5f5;padding:24px;border-radius:12px;'><div style='background:linear-gradient(135deg,#10b981,#059669);padding:32px;border-radius:10px;text-align:center;margin-bottom:24px;'><div style='font-size:3.5rem;margin-bottom:8px;'>🚀</div><h1 style='color:white;margin:0;font-size:1.3rem;'>Your Product is Live!</h1></div><div style='background:white;padding:24px;border-radius:10px;margin-bottom:20px;'><p style='color:#333;'>Hi <strong>{{ $('Webhook: Product Status Changed').first().json.body.seller_name }}</strong>,</p><p style='color:#555;line-height:1.7;'>Great news! Your listing <strong>{{ $('Webhook: Product Status Changed').first().json.body.product_title }}</strong> at <strong>₹{{ $('Webhook: Product Status Changed').first().json.body.price }}</strong> has been approved and is now live on NIRVANA MART!</p><p style='color:#555;'>Students can now find and purchase your item. You'll be notified when someone places an order.</p></div><div style='text-align:center;'><a href='https://nirvana-mart.onrender.com/shop' style='display:inline-block;background:#10b981;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;'>View Your Listing →</a></div><p style='color:#aaa;font-size:0.78rem;text-align:center;margin-top:20px;'>NIRVANA MART — Campus Marketplace</p></div>\"\n}",
+        "options": {}
+      },
+      "id": "n06-approved-email",
+      "name": "Email: Approved ✅",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 220]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $('Webhook: Product Status Changed').first().json.body.seller_email }}\"],\n  \"subject\": \"❌ Your listing needs changes — NIRVANA MART\",\n  \"html\": \"<div style='font-family:Segoe UI,sans-serif;max-width:600px;margin:0 auto;background:#f5f5f5;padding:24px;border-radius:12px;'><div style='background:linear-gradient(135deg,#ef4444,#dc2626);padding:28px;border-radius:10px;text-align:center;margin-bottom:24px;'><div style='font-size:3rem;margin-bottom:8px;'>⚠️</div><h1 style='color:white;margin:0;font-size:1.3rem;'>Listing Needs Revision</h1></div><div style='background:white;padding:24px;border-radius:10px;margin-bottom:20px;'><p style='color:#333;'>Hi <strong>{{ $('Webhook: Product Status Changed').first().json.body.seller_name }}</strong>,</p><p style='color:#555;line-height:1.7;'>Your listing <strong>{{ $('Webhook: Product Status Changed').first().json.body.product_title }}</strong> was not approved for the following reason:</p><div style='background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin:16px 0;'><p style='color:#dc2626;margin:0;font-weight:600;'>{{ $('Webhook: Product Status Changed').first().json.body.rejection_reason || 'Does not meet our listing guidelines. Please review and relist.' }}</p></div><p style='color:#555;'>Please update your listing and resubmit. Common issues:</p><ul style='color:#555;line-height:1.8;'><li>Unclear or low-quality product image</li><li>Price is unreasonably high or low</li><li>Description is too short or misleading</li><li>Item not suitable for campus marketplace</li></ul></div><div style='text-align:center;'><a href='https://nirvana-mart.onrender.com/seller.html' style='display:inline-block;background:#c8923a;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;'>Edit and Relist →</a></div><p style='color:#aaa;font-size:0.78rem;text-align:center;margin-top:20px;'>NIRVANA MART — Campus Marketplace</p></div>\"\n}",
+        "options": {}
+      },
+      "id": "n06-rejected-email",
+      "name": "Email: Rejected ❌",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 460]
+    }
+  ],
+  "connections": {
+    "Webhook: Product Status Changed": {
+      "main": [
+        [
+          { "node": "Respond OK", "type": "main", "index": 0 },
+          { "node": "Approved or Rejected?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Approved or Rejected?": {
+      "main": [
+        [{ "node": "Email: Approved ✅", "type": "main", "index": 0 }],
+        [{ "node": "Email: Rejected ❌", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "nirvana-wf-06"
+}

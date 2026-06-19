@@ -1,0 +1,120 @@
+{
+  "name": "01 - Morning Pending Products Check",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 9 * * 1-6" }]
+        }
+      },
+      "id": "n01-trigger",
+      "name": "Every Morning 9AM (Mon-Sat)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $vars.NIRVANA_BASE_URL }}/products/pending",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $vars.ADMIN_TOKEN }}" }
+          ]
+        },
+        "options": { "response": { "response": { "neverError": true } } }
+      },
+      "id": "n01-fetch",
+      "name": "Fetch Pending Products",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst products = Array.isArray(items[0].json) ? items[0].json : items.map(i => i.json);\nreturn [{ json: { products, count: products.length } }];"
+      },
+      "id": "n01-parse",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "c01",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "n01-if",
+      "name": "Any Pending?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { products, count } = $json;\nconst rows = products.map(p =>\n  `<tr>\n    <td style=\"padding:10px;border-bottom:1px solid #eee;\"><strong>${p.title}</strong></td>\n    <td style=\"padding:10px;border-bottom:1px solid #eee;\">${p.seller_name}</td>\n    <td style=\"padding:10px;border-bottom:1px solid #eee;\">₹${p.price}</td>\n    <td style=\"padding:10px;border-bottom:1px solid #eee;\">${p.category}</td>\n    <td style=\"padding:10px;border-bottom:1px solid #eee;\">${p.condition}</td>\n  </tr>`\n).join('');\n\nconst html = `\n<div style=\"font-family:'Segoe UI',sans-serif;max-width:640px;margin:0 auto;background:#f9f9f9;padding:24px;border-radius:12px;\">\n  <div style=\"background:linear-gradient(135deg,#c8923a,#e8b86d);padding:24px;border-radius:10px;text-align:center;margin-bottom:24px;\">\n    <h1 style=\"color:white;margin:0;font-size:1.4rem;\">📦 ${count} Product${count>1?'s':''} Pending Approval</h1>\n    <p style=\"color:rgba(255,255,255,0.85);margin:8px 0 0;\">Daily Morning Report — NIRVANA MART</p>\n  </div>\n  <table style=\"width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);\">\n    <thead>\n      <tr style=\"background:#c8923a;color:white;\">\n        <th style=\"padding:12px;text-align:left;\">Product</th>\n        <th style=\"padding:12px;text-align:left;\">Seller</th>\n        <th style=\"padding:12px;text-align:left;\">Price</th>\n        <th style=\"padding:12px;text-align:left;\">Category</th>\n        <th style=\"padding:12px;text-align:left;\">Condition</th>\n      </tr>\n    </thead>\n    <tbody>${rows}</tbody>\n  </table>\n  <div style=\"text-align:center;margin-top:24px;\">\n    <a href=\"https://nirvana-mart.onrender.com/nirvanamart-admin-portal\" style=\"display:inline-block;background:#c8923a;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:1rem;\">Review on Admin Panel →</a>\n  </div>\n  <p style=\"color:#999;font-size:0.8rem;text-align:center;margin-top:20px;\">NIRVANA MART Admin Automation | Sent at 9:00 AM</p>\n</div>`;\n\nreturn [{ json: { html, subject: `[NIRVANA MART] ⚠️ ${count} product${count>1?'s':''} need your approval` } }];"
+      },
+      "id": "n01-format",
+      "name": "Format HTML Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $vars.ADMIN_EMAIL }}\"],\n  \"subject\": \"{{ $json.subject }}\",\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "options": {}
+      },
+      "id": "n01-email",
+      "name": "Email Admin",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, 200]
+    },
+    {
+      "parameters": {},
+      "id": "n01-noop",
+      "name": "Nothing Pending ✅",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1100, 420]
+    }
+  ],
+  "connections": {
+    "Every Morning 9AM (Mon-Sat)": { "main": [[{ "node": "Fetch Pending Products", "type": "main", "index": 0 }]] },
+    "Fetch Pending Products": { "main": [[{ "node": "Parse Response", "type": "main", "index": 0 }]] },
+    "Parse Response": { "main": [[{ "node": "Any Pending?", "type": "main", "index": 0 }]] },
+    "Any Pending?": {
+      "main": [
+        [{ "node": "Format HTML Email", "type": "main", "index": 0 }],
+        [{ "node": "Nothing Pending ✅", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format HTML Email": { "main": [[{ "node": "Email Admin", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "nirvana-wf-01"
+}

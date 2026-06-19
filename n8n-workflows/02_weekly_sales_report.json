@@ -1,0 +1,143 @@
+{
+  "name": "02 - Weekly Sales Report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 8 * * 1" }]
+        }
+      },
+      "id": "n02-trigger",
+      "name": "Every Monday 8AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $vars.NIRVANA_BASE_URL }}/orders",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $vars.ADMIN_TOKEN }}" }]
+        },
+        "options": { "response": { "response": { "neverError": true } } }
+      },
+      "id": "n02-orders",
+      "name": "Fetch All Orders",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 200]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $vars.NIRVANA_BASE_URL }}/users",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $vars.ADMIN_TOKEN }}" }]
+        },
+        "options": { "response": { "response": { "neverError": true } } }
+      },
+      "id": "n02-users",
+      "name": "Fetch All Users",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 420]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $vars.NIRVANA_BASE_URL }}/products",
+        "options": { "response": { "response": { "neverError": true } } }
+      },
+      "id": "n02-products",
+      "name": "Fetch All Products",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 620]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get data from previous nodes (they run in parallel via merge)\nconst allData = $input.all();\n\n// Extract data - these come from the 3 HTTP calls\nconst ordersRaw = allData[0]?.json;\nconst usersRaw = allData[1]?.json;\nconst productsRaw = allData[2]?.json;\n\nconst orders = Array.isArray(ordersRaw) ? ordersRaw : [];\nconst users = Array.isArray(usersRaw) ? usersRaw : [];\nconst products = Array.isArray(productsRaw) ? productsRaw : [];\n\n// Calculate week boundaries\nconst now = new Date();\nconst weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);\n\n// Filter this week's data\nconst weekOrders = orders.filter(o => new Date(o.created_at) >= weekAgo);\nconst weekUsers = users.filter(u => new Date(u.created_at) >= weekAgo);\nconst weekProducts = products.filter(p => new Date(p.created_at) >= weekAgo);\n\n// Calculate stats\nconst totalRevenue = weekOrders.reduce((sum, o) => sum + (o.total_price || o.price || 0), 0);\nconst avgOrderValue = weekOrders.length ? (totalRevenue / weekOrders.length).toFixed(0) : 0;\n\n// Top categories\nconst catCount = {};\nweekOrders.forEach(o => { if(o.category) catCount[o.category] = (catCount[o.category]||0) + 1; });\nconst topCat = Object.entries(catCount).sort((a,b) => b[1]-a[1])[0];\n\nconst weekStr = `${weekAgo.toLocaleDateString('en-IN')} – ${now.toLocaleDateString('en-IN')}`;\n\nconst html = `\n<div style=\"font-family:'Segoe UI',sans-serif;max-width:640px;margin:0 auto;background:#f5f5f5;padding:24px;border-radius:12px;\">\n  <div style=\"background:linear-gradient(135deg,#0a0a14,#1a102a);padding:28px;border-radius:10px;text-align:center;margin-bottom:24px;\">\n    <h1 style=\"color:#e8b86d;margin:0;font-size:1.5rem;\">📊 Weekly Report</h1>\n    <p style=\"color:rgba(255,255,255,0.7);margin:6px 0 0;font-size:0.9rem;\">${weekStr}</p>\n  </div>\n  <div style=\"display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;\">\n    <div style=\"background:white;padding:20px;border-radius:10px;border-left:4px solid #c8923a;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">\n      <div style=\"font-size:1.8rem;font-weight:800;color:#c8923a;\">${weekOrders.length}</div>\n      <div style=\"color:#666;font-size:0.85rem;margin-top:4px;\">Orders This Week</div>\n    </div>\n    <div style=\"background:white;padding:20px;border-radius:10px;border-left:4px solid #10b981;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">\n      <div style=\"font-size:1.8rem;font-weight:800;color:#10b981;\">₹${totalRevenue.toLocaleString('en-IN')}</div>\n      <div style=\"color:#666;font-size:0.85rem;margin-top:4px;\">Total Revenue</div>\n    </div>\n    <div style=\"background:white;padding:20px;border-radius:10px;border-left:4px solid #6366f1;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">\n      <div style=\"font-size:1.8rem;font-weight:800;color:#6366f1;\">${weekUsers.length}</div>\n      <div style=\"color:#666;font-size:0.85rem;margin-top:4px;\">New Users</div>\n    </div>\n    <div style=\"background:white;padding:20px;border-radius:10px;border-left:4px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">\n      <div style=\"font-size:1.8rem;font-weight:800;color:#f59e0b;\">${weekProducts.length}</div>\n      <div style=\"color:#666;font-size:0.85rem;margin-top:4px;\">New Listings</div>\n    </div>\n  </div>\n  <div style=\"background:white;padding:20px;border-radius:10px;margin-bottom:16px;\">\n    <h3 style=\"margin:0 0 12px;color:#333;\">📈 Summary</h3>\n    <p style=\"margin:4px 0;color:#555;\">• Average order value: <strong>₹${avgOrderValue}</strong></p>\n    <p style=\"margin:4px 0;color:#555;\">• Total active products: <strong>${products.length}</strong></p>\n    <p style=\"margin:4px 0;color:#555;\">• Total registered users: <strong>${users.length}</strong></p>\n    ${topCat ? `<p style=\"margin:4px 0;color:#555;\">• Top category this week: <strong>${topCat[0]}</strong> (${topCat[1]} orders)</p>` : ''}\n  </div>\n  <div style=\"text-align:center;\">\n    <a href=\"https://nirvana-mart.onrender.com/nirvanamart-admin-portal\" style=\"display:inline-block;background:#c8923a;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;\">Open Admin Dashboard →</a>\n  </div>\n  <p style=\"color:#aaa;font-size:0.78rem;text-align:center;margin-top:20px;\">NIRVANA MART Weekly Automation Report</p>\n</div>`;\n\nreturn [{\n  json: {\n    html,\n    subject: `📊 NIRVANA MART — Weekly Report (${weekStr})`,\n    stats: {\n      week: weekStr,\n      orders: weekOrders.length,\n      revenue: totalRevenue,\n      newUsers: weekUsers.length,\n      newListings: weekProducts.length,\n      avgOrderValue,\n      totalUsers: users.length,\n      totalProducts: products.length\n    }\n  }\n}];"
+      },
+      "id": "n02-aggregate",
+      "name": "Aggregate Weekly Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [740, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $vars.ADMIN_EMAIL }}\"],\n  \"subject\": {{ JSON.stringify($json.subject) }},\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "options": {}
+      },
+      "id": "n02-email",
+      "name": "Email Weekly Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [980, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "value": "={{ $vars.GOOGLE_SHEETS_ID }}", "__rl": true, "mode": "id" },
+        "sheetName": { "value": "Weekly Reports", "__rl": true, "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Week": "={{ $json.stats.week }}",
+            "Orders": "={{ $json.stats.orders }}",
+            "Revenue (INR)": "={{ $json.stats.revenue }}",
+            "New Users": "={{ $json.stats.newUsers }}",
+            "New Listings": "={{ $json.stats.newListings }}",
+            "Avg Order Value": "={{ $json.stats.avgOrderValue }}",
+            "Total Users": "={{ $json.stats.totalUsers }}",
+            "Total Products": "={{ $json.stats.totalProducts }}"
+          }
+        }
+      },
+      "id": "n02-sheets",
+      "name": "Append to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [980, 500]
+    }
+  ],
+  "connections": {
+    "Every Monday 8AM": {
+      "main": [
+        [
+          { "node": "Fetch All Orders", "type": "main", "index": 0 },
+          { "node": "Fetch All Users", "type": "main", "index": 0 },
+          { "node": "Fetch All Products", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch All Orders": { "main": [[{ "node": "Aggregate Weekly Stats", "type": "main", "index": 0 }]] },
+    "Fetch All Users": { "main": [[{ "node": "Aggregate Weekly Stats", "type": "main", "index": 1 }]] },
+    "Fetch All Products": { "main": [[{ "node": "Aggregate Weekly Stats", "type": "main", "index": 2 }]] },
+    "Aggregate Weekly Stats": {
+      "main": [
+        [
+          { "node": "Email Weekly Report", "type": "main", "index": 0 },
+          { "node": "Append to Google Sheets", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "nirvana-wf-02"
+}

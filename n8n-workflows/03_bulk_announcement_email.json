@@ -1,0 +1,107 @@
+{
+  "name": "03 - Bulk Announcement Email to All Users",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Send Announcement to All NIRVANA MART Users",
+        "formDescription": "This will email ALL registered users. Use carefully.",
+        "formFields": {
+          "values": [
+            { "fieldLabel": "Email Subject", "placeholder": "e.g. 🎉 New Feature Alert!", "requiredField": true },
+            { "fieldLabel": "Announcement Title", "placeholder": "e.g. Introducing Campus Corners", "requiredField": true },
+            { "fieldLabel": "Message Body", "fieldType": "textarea", "placeholder": "Write your announcement here...", "requiredField": true },
+            { "fieldLabel": "Button Text", "placeholder": "e.g. Explore Now", "requiredField": false },
+            { "fieldLabel": "Button URL", "placeholder": "e.g. https://nirvana-mart.onrender.com/shop", "requiredField": false }
+          ]
+        }
+      },
+      "id": "n03-trigger",
+      "name": "Form: Write Announcement",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [200, 300],
+      "webhookId": "nirvana-announce-form"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $vars.NIRVANA_BASE_URL }}/users",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $vars.ADMIN_TOKEN }}" }]
+        },
+        "options": {}
+      },
+      "id": "n03-fetch-users",
+      "name": "Fetch All Users",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const formData = $('Form: Write Announcement').first().json;\nconst usersRaw = $input.first().json;\nconst users = Array.isArray(usersRaw) ? usersRaw : [];\n\nconst subject = formData['Email Subject'] || 'Announcement from NIRVANA MART';\nconst title = formData['Announcement Title'] || 'Important Update';\nconst body = formData['Message Body'] || '';\nconst btnText = formData['Button Text'] || 'Visit NIRVANA MART';\nconst btnUrl = formData['Button URL'] || 'https://nirvana-mart.onrender.com';\n\nconst emailsToSend = users\n  .filter(u => u.email)\n  .map(u => ({\n    to: u.email,\n    name: u.name || 'Student',\n    subject,\n    html: `\n<div style=\"font-family:'Segoe UI',sans-serif;max-width:600px;margin:0 auto;background:#f5f5f5;padding:24px;border-radius:12px;\">\n  <div style=\"background:linear-gradient(135deg,#0a0a14,#1a102a);padding:32px;border-radius:10px;text-align:center;margin-bottom:24px;\">\n    <img src=\"https://nirvana-mart.onrender.com/LOGO.png\" style=\"height:50px;margin-bottom:16px;\" alt=\"NIRVANA MART\">\n    <h1 style=\"color:#e8b86d;margin:0;font-size:1.4rem;\">${title}</h1>\n  </div>\n  <div style=\"background:white;padding:24px;border-radius:10px;margin-bottom:20px;\">\n    <p style=\"color:#555;line-height:1.7;font-size:0.95rem;\">Hi <strong>${u.name || 'there'}</strong>,</p>\n    <div style=\"color:#333;line-height:1.8;font-size:0.95rem;\">${body.replace(/\\n/g, '<br>')}</div>\n  </div>\n  ${btnUrl ? `<div style=\"text-align:center;margin-bottom:20px;\"><a href=\"${btnUrl}\" style=\"display:inline-block;background:#c8923a;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:1rem;\">${btnText} →</a></div>` : ''}\n  <p style=\"color:#aaa;font-size:0.78rem;text-align:center;\">You received this because you're a NIRVANA MART member. <a href=\"${btnUrl || 'https://nirvana-mart.onrender.com'}\" style=\"color:#c8923a;\">Visit Platform</a></p>\n</div>`\n  }));\n\nreturn emailsToSend.map(e => ({ json: e }));"
+      },
+      "id": "n03-prepare",
+      "name": "Prepare Emails for Each User",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": { "reset": false }
+      },
+      "id": "n03-batch",
+      "name": "Send in Batches of 5",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $json.to }}\"],\n  \"subject\": {{ JSON.stringify($json.subject) }},\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "options": {}
+      },
+      "id": "n03-send",
+      "name": "Send Email to User",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "seconds"
+      },
+      "id": "n03-wait",
+      "name": "Wait 1s (Rate Limit)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1100, 160]
+    }
+  ],
+  "connections": {
+    "Form: Write Announcement": { "main": [[{ "node": "Fetch All Users", "type": "main", "index": 0 }]] },
+    "Fetch All Users": { "main": [[{ "node": "Prepare Emails for Each User", "type": "main", "index": 0 }]] },
+    "Prepare Emails for Each User": { "main": [[{ "node": "Send in Batches of 5", "type": "main", "index": 0 }]] },
+    "Send in Batches of 5": { "main": [[{ "node": "Send Email to User", "type": "main", "index": 0 }], []] },
+    "Send Email to User": { "main": [[{ "node": "Wait 1s (Rate Limit)", "type": "main", "index": 0 }]] },
+    "Wait 1s (Rate Limit)": { "main": [[{ "node": "Send in Batches of 5", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "nirvana-wf-03"
+}

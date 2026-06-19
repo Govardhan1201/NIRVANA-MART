@@ -1,0 +1,152 @@
+{
+  "name": "08 - Inactive Users Re-engagement",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 10 * * 1" }]
+        }
+      },
+      "id": "n08-trigger",
+      "name": "Every Monday 10AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $vars.NIRVANA_BASE_URL }}/users",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $vars.ADMIN_TOKEN }}" }]
+        },
+        "options": {}
+      },
+      "id": "n08-fetch-users",
+      "name": "Fetch All Users",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $vars.NIRVANA_BASE_URL }}/products?limit=6",
+        "options": {}
+      },
+      "id": "n08-fetch-products",
+      "name": "Fetch Featured Products",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "const usersRaw = $('Fetch All Users').first().json;\nconst productsRaw = $('Fetch Featured Products').first().json;\n\nconst users = Array.isArray(usersRaw) ? usersRaw : [];\nconst products = Array.isArray(productsRaw) ? productsRaw : [];\n\n// Find inactive users (no login in 14+ days, based on updated_at or created_at)\nconst twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);\nconst inactiveUsers = users.filter(u => {\n  const lastSeen = new Date(u.last_login || u.updated_at || u.created_at);\n  return lastSeen < twoWeeksAgo;\n});\n\n// Build featured products HTML\nconst productCards = products.slice(0, 3).map(p =>\n  `<div style='background:#f9f9f9;border-radius:8px;padding:12px;margin-bottom:10px;display:flex;gap:12px;align-items:center;'>\n    <img src='${p.image_url}' style='width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;' />\n    <div>\n      <div style='font-weight:700;color:#333;font-size:0.9rem;'>${p.title}</div>\n      <div style='color:#c8923a;font-weight:700;'>₹${p.price?.toLocaleString('en-IN')}</div>\n      <div style='color:#888;font-size:0.78rem;'>${p.category} • ${p.condition}</div>\n    </div>\n  </div>`\n).join('');\n\n// Prepare email data for each inactive user\nreturn inactiveUsers.map(u => ({\n  json: {\n    to: u.email,\n    name: u.name || 'Student',\n    subject: `👋 We miss you on NIRVANA MART!`,\n    html: `\n<div style='font-family:Segoe UI,sans-serif;max-width:600px;margin:0 auto;background:#f5f5f5;padding:24px;border-radius:12px;'>\n  <div style='background:linear-gradient(135deg,#0a0a14,#1a102a);padding:32px;border-radius:10px;text-align:center;margin-bottom:24px;'>\n    <h1 style='color:#e8b86d;margin:0;font-size:1.3rem;'>👋 Long time no see, ${u.name?.split(' ')[0] || 'there'}!</h1>\n    <p style='color:rgba(255,255,255,0.7);margin:8px 0 0;'>New items have been listed since you last visited</p>\n  </div>\n  <div style='background:white;padding:24px;border-radius:10px;margin-bottom:16px;'>\n    <h3 style='color:#333;margin:0 0 16px;'>🔥 Fresh Listings This Week</h3>\n    ${productCards}\n  </div>\n  <div style='text-align:center;margin-bottom:20px;'>\n    <a href='https://nirvana-mart.onrender.com/shop' style='display:inline-block;background:#c8923a;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:1rem;'>Browse All Products →</a>\n  </div>\n  <p style='color:#aaa;font-size:0.78rem;text-align:center;'>NIRVANA MART — Your Campus Marketplace</p>\n</div>`\n  }\n}));"
+      },
+      "id": "n08-filter-inactive",
+      "name": "Filter Inactive + Prepare Emails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 380]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "c08",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "n08-if-any",
+      "name": "Any Inactive Users?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [880, 380]
+    },
+    {
+      "parameters": {
+        "batchSize": 3,
+        "options": {}
+      },
+      "id": "n08-batch",
+      "name": "Process in Batches of 3",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1100, 260]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $vars.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $json.to }}\"],\n  \"subject\": {{ JSON.stringify($json.subject) }},\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "options": {}
+      },
+      "id": "n08-send-email",
+      "name": "Send Re-engagement Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, 260]
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "id": "n08-wait",
+      "name": "Rate Limit Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1320, 100]
+    },
+    {
+      "parameters": {},
+      "id": "n08-noop",
+      "name": "All Users Active ✅",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1100, 480]
+    }
+  ],
+  "connections": {
+    "Every Monday 10AM": {
+      "main": [
+        [
+          { "node": "Fetch All Users", "type": "main", "index": 0 },
+          { "node": "Fetch Featured Products", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch All Users": { "main": [[{ "node": "Filter Inactive + Prepare Emails", "type": "main", "index": 0 }]] },
+    "Fetch Featured Products": { "main": [[{ "node": "Filter Inactive + Prepare Emails", "type": "main", "index": 1 }]] },
+    "Filter Inactive + Prepare Emails": { "main": [[{ "node": "Any Inactive Users?", "type": "main", "index": 0 }]] },
+    "Any Inactive Users?": {
+      "main": [
+        [{ "node": "Process in Batches of 3", "type": "main", "index": 0 }],
+        [{ "node": "All Users Active ✅", "type": "main", "index": 0 }]
+      ]
+    },
+    "Process in Batches of 3": { "main": [[{ "node": "Send Re-engagement Email", "type": "main", "index": 0 }], []] },
+    "Send Re-engagement Email": { "main": [[{ "node": "Rate Limit Wait", "type": "main", "index": 0 }]] },
+    "Rate Limit Wait": { "main": [[{ "node": "Process in Batches of 3", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "nirvana-wf-08"
+}
