@@ -12,7 +12,10 @@
       "name": "Webhook: User Registered",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [200, 300],
+      "position": [
+        200,
+        300
+      ],
       "webhookId": "nirvana-user-registered"
     },
     {
@@ -24,29 +27,27 @@
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [420, 160]
+      "position": [
+        420,
+        160
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $json.body.email }}\"],\n  \"subject\": \"Welcome to NIRVANA MART, {{ $json.body.name }}! 🎓\",\n  \"html\": {{ JSON.stringify(`<div style='font-family:Segoe UI,sans-serif;max-width:600px;margin:0 auto;background:#f5f5f5;padding:24px;border-radius:12px;'><div style='background:linear-gradient(135deg,#0a0a14,#1a102a);padding:32px;border-radius:10px;text-align:center;margin-bottom:24px;'><img src='https://nirvana-mart.onrender.com/LOGO.png' style='height:60px;margin-bottom:16px;' alt='NIRVANA MART'><h1 style='color:#e8b86d;margin:0;font-size:1.5rem;'>Welcome to NIRVANA MART! 🎉</h1><p style='color:rgba(255,255,255,0.7);margin:8px 0 0;'>Your campus marketplace awaits</p></div><div style='background:white;padding:24px;border-radius:10px;margin-bottom:20px;'><p style='color:#333;font-size:1rem;'>Hi <strong>${$json.body.name}</strong>,</p><p style='color:#555;line-height:1.7;'>You've just joined NIRVANA MART — the smartest way to buy and sell on campus. Here's how to get started:</p><div style='background:#f9f9f9;border-radius:8px;padding:16px;margin:16px 0;'><p style='margin:8px 0;color:#333;'>🛍️ <strong>Browse Products</strong> — Find deals from fellow students</p><p style='margin:8px 0;color:#333;'>📦 <strong>List Your Items</strong> — Turn unused stuff into cash</p><p style='margin:8px 0;color:#333;'>🏫 <strong>Campus Corners</strong> — Hostel, Academic & Engineering stores</p><p style='margin:8px 0;color:#333;'>❤️ <strong>Wishlist</strong> — Save items you love</p></div></div><div style='text-align:center;margin-bottom:24px;'><a href='https://nirvana-mart.onrender.com/shop' style='display:inline-block;background:#c8923a;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:1rem;margin-right:12px;'>Browse Products →</a></div><p style='color:#aaa;font-size:0.78rem;text-align:center;'>NIRVANA MART — Campus Marketplace | VIIT</p></div>`) }}\n}",
+        "fromEmail": "NIRVANA MART <nirvanamart0@gmail.com>",
+        "toEmail": "={{ $json.body.email }}",
+        "subject": "\"Welcome to NIRVANA MART",
+        "html": "{{ JSON.stringify(`<div style='font-family:Segoe UI,sans-serif;max-width:600px;margin:0 auto;background:#f5f5f5;padding:24px;border-radius:12px;'><div style='background:linear-gradient(135deg,#0a0a14,#1a102a);padding:32px;border-radius:10px;text-align:center;margin-bottom:24px;'><img src='https://nirvana-mart.onrender.com/LOGO.png' style='height:60px;margin-bottom:16px;' alt='NIRVANA MART'><h1 style='color:#e8b86d;margin:0;font-size:1.5rem;'>Welcome to NIRVANA MART! 🎉</h1><p style='color:rgba(255,255,255,0.7);margin:8px 0 0;'>Your campus marketplace awaits</p></div><div style='background:white;padding:24px;border-radius:10px;margin-bottom:20px;'><p style='color:#333;font-size:1rem;'>Hi <strong>${$json.body.name",
         "options": {}
       },
       "id": "n04-welcome-email",
       "name": "Send Welcome Email",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [420, 360]
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        420,
+        360
+      ]
     },
     {
       "parameters": {
@@ -57,7 +58,10 @@
       "name": "Wait 3 Days",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [660, 360]
+      "position": [
+        660,
+        360
+      ]
     },
     {
       "parameters": {
@@ -65,15 +69,29 @@
         "url": "={{ $env.NIRVANA_BASE_URL }}/products/mine",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $('Webhook: User Registered').first().json.body.token }}" }]
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Webhook: User Registered').first().json.body.token }}"
+            }
+          ]
         },
-        "options": { "response": { "response": { "neverError": true } } }
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       },
       "id": "n04-check-activity",
       "name": "Check If User Listed Anything",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [880, 360]
+      "position": [
+        880,
+        360
+      ]
     },
     {
       "parameters": {
@@ -83,7 +101,10 @@
               "id": "c04",
               "leftValue": "={{ Array.isArray($json) ? $json.length : 0 }}",
               "rightValue": 0,
-              "operator": { "type": "number", "operation": "equals" }
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -93,29 +114,27 @@
       "name": "Has Not Listed Yet?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1100, 360]
+      "position": [
+        1100,
+        360
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $('Webhook: User Registered').first().json.body.email }}\"],\n  \"subject\": \"💸 Turn your unused stuff into cash!\",\n  \"html\": \"<div style='font-family:Segoe UI,sans-serif;max-width:600px;margin:0 auto;background:#f5f5f5;padding:24px;border-radius:12px;'><div style='background:linear-gradient(135deg,#c8923a,#e8b86d);padding:28px;border-radius:10px;text-align:center;margin-bottom:24px;'><h1 style='color:white;margin:0;font-size:1.3rem;'>Got anything to sell? 📦</h1></div><div style='background:white;padding:24px;border-radius:10px;margin-bottom:20px;'><p style='color:#333;'>Hi {{ $('Webhook: User Registered').first().json.body.name }},</p><p style='color:#555;line-height:1.7;'>We noticed you haven't listed anything yet! Old textbooks, electronics, clothes — students are buying everything on NIRVANA MART.</p><p style='color:#555;'>Listing takes less than 2 minutes. 🚀</p></div><div style='text-align:center;'><a href='https://nirvana-mart.onrender.com/seller.html' style='display:inline-block;background:#c8923a;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;'>List Your First Item →</a></div><p style='color:#aaa;font-size:0.78rem;text-align:center;margin-top:20px;'>NIRVANA MART — Campus Marketplace</p></div>\"\n}",
+        "fromEmail": "NIRVANA MART <nirvanamart0@gmail.com>",
+        "toEmail": "={{ $('Webhook: User Registered').first().json.body.email }}",
+        "subject": "💸 Turn your unused stuff into cash!",
+        "html": "\"<div style='font-family:Segoe UI,sans-serif;max-width:600px;margin:0 auto;background:#f5f5f5;padding:24px;border-radius:12px;'><div style='background:linear-gradient(135deg,#c8923a,#e8b86d);padding:28px;border-radius:10px;text-align:center;margin-bottom:24px;'><h1 style='color:white;margin:0;font-size:1.3rem;'>Got anything to sell? 📦</h1></div><div style='background:white;padding:24px;border-radius:10px;margin-bottom:20px;'><p style='color:#333;'>Hi {{ $('Webhook: User Registered').first().json.body.name",
         "options": {}
       },
       "id": "n04-nudge-email",
       "name": "Send Seller Nudge Email",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1320, 260]
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        260
+      ]
     },
     {
       "parameters": {},
@@ -123,29 +142,84 @@
       "name": "Already Active ✅",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [1320, 460]
+      "position": [
+        1320,
+        460
+      ]
     }
   ],
   "connections": {
     "Webhook: User Registered": {
       "main": [
         [
-          { "node": "Respond to Webhook", "type": "main", "index": 0 },
-          { "node": "Send Welcome Email", "type": "main", "index": 0 }
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
-    "Send Welcome Email": { "main": [[{ "node": "Wait 3 Days", "type": "main", "index": 0 }]] },
-    "Wait 3 Days": { "main": [[{ "node": "Check If User Listed Anything", "type": "main", "index": 0 }]] },
-    "Check If User Listed Anything": { "main": [[{ "node": "Has Not Listed Yet?", "type": "main", "index": 0 }]] },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Wait 3 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 3 Days": {
+      "main": [
+        [
+          {
+            "node": "Check If User Listed Anything",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If User Listed Anything": {
+      "main": [
+        [
+          {
+            "node": "Has Not Listed Yet?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Has Not Listed Yet?": {
       "main": [
-        [{ "node": "Send Seller Nudge Email", "type": "main", "index": 0 }],
-        [{ "node": "Already Active ✅", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Send Seller Nudge Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Already Active ✅",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "id": "nirvana-wf-04"
 }

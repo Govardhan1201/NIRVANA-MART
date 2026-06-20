@@ -4,14 +4,22 @@
     {
       "parameters": {
         "rule": {
-          "interval": [{ "field": "cronExpression", "expression": "0 9 * * 1-6" }]
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-6"
+            }
+          ]
         }
       },
       "id": "n01-trigger",
       "name": "Every Morning 9AM (Mon-Sat)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
-      "position": [200, 300]
+      "position": [
+        200,
+        300
+      ]
     },
     {
       "parameters": {
@@ -20,16 +28,28 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.ADMIN_TOKEN }}"
+            }
           ]
         },
-        "options": { "response": { "response": { "neverError": true } } }
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       },
       "id": "n01-fetch",
       "name": "Fetch Pending Products",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [440, 300]
+      "position": [
+        440,
+        300
+      ]
     },
     {
       "parameters": {
@@ -39,7 +59,10 @@
       "name": "Parse Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 300]
+      "position": [
+        660,
+        300
+      ]
     },
     {
       "parameters": {
@@ -49,7 +72,10 @@
               "id": "c01",
               "leftValue": "={{ $json.count }}",
               "rightValue": 0,
-              "operator": { "type": "number", "operation": "gt" }
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
             }
           ],
           "combinator": "and"
@@ -59,7 +85,10 @@
       "name": "Any Pending?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [880, 300]
+      "position": [
+        880,
+        300
+      ]
     },
     {
       "parameters": {
@@ -69,29 +98,27 @@
       "name": "Format HTML Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 200]
+      "position": [
+        1100,
+        200
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $env.ADMIN_EMAIL }}\"],\n  \"subject\": \"{{ $json.subject }}\",\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "fromEmail": "NIRVANA MART <nirvanamart0@gmail.com>",
+        "toEmail": "={{ $env.ADMIN_EMAIL }}",
+        "subject": "={{$json.subject}}",
+        "html": "{{ JSON.stringify($json.html)",
         "options": {}
       },
       "id": "n01-email",
       "name": "Email Admin",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1320, 200]
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        200
+      ]
     },
     {
       "parameters": {},
@@ -99,22 +126,79 @@
       "name": "Nothing Pending ✅",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [1100, 420]
+      "position": [
+        1100,
+        420
+      ]
     }
   ],
   "connections": {
-    "Every Morning 9AM (Mon-Sat)": { "main": [[{ "node": "Fetch Pending Products", "type": "main", "index": 0 }]] },
-    "Fetch Pending Products": { "main": [[{ "node": "Parse Response", "type": "main", "index": 0 }]] },
-    "Parse Response": { "main": [[{ "node": "Any Pending?", "type": "main", "index": 0 }]] },
-    "Any Pending?": {
+    "Every Morning 9AM (Mon-Sat)": {
       "main": [
-        [{ "node": "Format HTML Email", "type": "main", "index": 0 }],
-        [{ "node": "Nothing Pending ✅", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Fetch Pending Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
-    "Format HTML Email": { "main": [[{ "node": "Email Admin", "type": "main", "index": 0 }]] }
+    "Fetch Pending Products": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Any Pending?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Pending?": {
+      "main": [
+        [
+          {
+            "node": "Format HTML Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nothing Pending ✅",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format HTML Email": {
+      "main": [
+        [
+          {
+            "node": "Email Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "id": "nirvana-wf-01"
 }

@@ -4,14 +4,22 @@
     {
       "parameters": {
         "rule": {
-          "interval": [{ "field": "cronExpression", "expression": "0 8 * * 1" }]
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1"
+            }
+          ]
         }
       },
       "id": "n02-trigger",
       "name": "Every Monday 8AM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
-      "position": [200, 300]
+      "position": [
+        200,
+        300
+      ]
     },
     {
       "parameters": {
@@ -19,15 +27,29 @@
         "url": "={{ $env.NIRVANA_BASE_URL }}/orders",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }]
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.ADMIN_TOKEN }}"
+            }
+          ]
         },
-        "options": { "response": { "response": { "neverError": true } } }
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       },
       "id": "n02-orders",
       "name": "Fetch All Orders",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [420, 200]
+      "position": [
+        420,
+        200
+      ]
     },
     {
       "parameters": {
@@ -35,27 +57,50 @@
         "url": "={{ $env.NIRVANA_BASE_URL }}/users",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }]
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.ADMIN_TOKEN }}"
+            }
+          ]
         },
-        "options": { "response": { "response": { "neverError": true } } }
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       },
       "id": "n02-users",
       "name": "Fetch All Users",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [420, 420]
+      "position": [
+        420,
+        420
+      ]
     },
     {
       "parameters": {
         "method": "GET",
         "url": "={{ $env.NIRVANA_BASE_URL }}/products",
-        "options": { "response": { "response": { "neverError": true } } }
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       },
       "id": "n02-products",
       "name": "Fetch All Products",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [420, 620]
+      "position": [
+        420,
+        620
+      ]
     },
     {
       "parameters": {
@@ -65,35 +110,41 @@
       "name": "Aggregate Weekly Stats",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [740, 400]
+      "position": [
+        740,
+        400
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $env.ADMIN_EMAIL }}\"],\n  \"subject\": {{ JSON.stringify($json.subject) }},\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "fromEmail": "NIRVANA MART <nirvanamart0@gmail.com>",
+        "toEmail": "={{ $env.ADMIN_EMAIL }}",
+        "subject": "={{$json.subject}}",
+        "html": "{{ JSON.stringify($json.html)",
         "options": {}
       },
       "id": "n02-email",
       "name": "Email Weekly Report",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [980, 300]
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        980,
+        300
+      ]
     },
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "value": "={{ $env.GOOGLE_SHEETS_ID }}", "__rl": true, "mode": "id" },
-        "sheetName": { "value": "Weekly Reports", "__rl": true, "mode": "name" },
+        "documentId": {
+          "value": "={{ $env.GOOGLE_SHEETS_ID }}",
+          "__rl": true,
+          "mode": "id"
+        },
+        "sheetName": {
+          "value": "Weekly Reports",
+          "__rl": true,
+          "mode": "name"
+        },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
@@ -112,32 +163,87 @@
       "name": "Append to Google Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
-      "position": [980, 500]
+      "position": [
+        980,
+        500
+      ]
     }
   ],
   "connections": {
     "Every Monday 8AM": {
       "main": [
         [
-          { "node": "Fetch All Orders", "type": "main", "index": 0 },
-          { "node": "Fetch All Users", "type": "main", "index": 0 },
-          { "node": "Fetch All Products", "type": "main", "index": 0 }
+          {
+            "node": "Fetch All Orders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch All Users",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch All Products",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
-    "Fetch All Orders": { "main": [[{ "node": "Aggregate Weekly Stats", "type": "main", "index": 0 }]] },
-    "Fetch All Users": { "main": [[{ "node": "Aggregate Weekly Stats", "type": "main", "index": 1 }]] },
-    "Fetch All Products": { "main": [[{ "node": "Aggregate Weekly Stats", "type": "main", "index": 2 }]] },
+    "Fetch All Orders": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Weekly Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch All Users": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Weekly Stats",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Fetch All Products": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Weekly Stats",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
     "Aggregate Weekly Stats": {
       "main": [
         [
-          { "node": "Email Weekly Report", "type": "main", "index": 0 },
-          { "node": "Append to Google Sheets", "type": "main", "index": 0 }
+          {
+            "node": "Email Weekly Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "id": "nirvana-wf-02"
 }

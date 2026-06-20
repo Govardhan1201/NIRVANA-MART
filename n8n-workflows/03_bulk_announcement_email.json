@@ -7,11 +7,32 @@
         "formDescription": "This will email ALL registered users. Use carefully.",
         "formFields": {
           "values": [
-            { "fieldLabel": "Email Subject", "placeholder": "e.g. 🎉 New Feature Alert!", "requiredField": true },
-            { "fieldLabel": "Announcement Title", "placeholder": "e.g. Introducing Campus Corners", "requiredField": true },
-            { "fieldLabel": "Message Body", "fieldType": "textarea", "placeholder": "Write your announcement here...", "requiredField": true },
-            { "fieldLabel": "Button Text", "placeholder": "e.g. Explore Now", "requiredField": false },
-            { "fieldLabel": "Button URL", "placeholder": "e.g. https://nirvana-mart.onrender.com/shop", "requiredField": false }
+            {
+              "fieldLabel": "Email Subject",
+              "placeholder": "e.g. 🎉 New Feature Alert!",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Announcement Title",
+              "placeholder": "e.g. Introducing Campus Corners",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Message Body",
+              "fieldType": "textarea",
+              "placeholder": "Write your announcement here...",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Button Text",
+              "placeholder": "e.g. Explore Now",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Button URL",
+              "placeholder": "e.g. https://nirvana-mart.onrender.com/shop",
+              "requiredField": false
+            }
           ]
         }
       },
@@ -19,7 +40,10 @@
       "name": "Form: Write Announcement",
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
-      "position": [200, 300],
+      "position": [
+        200,
+        300
+      ],
       "webhookId": "nirvana-announce-form"
     },
     {
@@ -28,7 +52,12 @@
         "url": "={{ $env.NIRVANA_BASE_URL }}/users",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }]
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.ADMIN_TOKEN }}"
+            }
+          ]
         },
         "options": {}
       },
@@ -36,7 +65,10 @@
       "name": "Fetch All Users",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [440, 300]
+      "position": [
+        440,
+        300
+      ]
     },
     {
       "parameters": {
@@ -46,40 +78,43 @@
       "name": "Prepare Emails for Each User",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 300]
+      "position": [
+        660,
+        300
+      ]
     },
     {
       "parameters": {
         "batchSize": 5,
-        "options": { "reset": false }
+        "options": {
+          "reset": false
+        }
       },
       "id": "n03-batch",
       "name": "Send in Batches of 5",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [880, 300]
+      "position": [
+        880,
+        300
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $json.to }}\"],\n  \"subject\": {{ JSON.stringify($json.subject) }},\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "fromEmail": "NIRVANA MART <nirvanamart0@gmail.com>",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{$json.subject}}",
+        "html": "{{ JSON.stringify($json.html)",
         "options": {}
       },
       "id": "n03-send",
       "name": "Send Email to User",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1100, 300]
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        300
+      ]
     },
     {
       "parameters": {
@@ -90,18 +125,84 @@
       "name": "Wait 1s (Rate Limit)",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [1100, 160]
+      "position": [
+        1100,
+        160
+      ]
     }
   ],
   "connections": {
-    "Form: Write Announcement": { "main": [[{ "node": "Fetch All Users", "type": "main", "index": 0 }]] },
-    "Fetch All Users": { "main": [[{ "node": "Prepare Emails for Each User", "type": "main", "index": 0 }]] },
-    "Prepare Emails for Each User": { "main": [[{ "node": "Send in Batches of 5", "type": "main", "index": 0 }]] },
-    "Send in Batches of 5": { "main": [[{ "node": "Send Email to User", "type": "main", "index": 0 }], []] },
-    "Send Email to User": { "main": [[{ "node": "Wait 1s (Rate Limit)", "type": "main", "index": 0 }]] },
-    "Wait 1s (Rate Limit)": { "main": [[{ "node": "Send in Batches of 5", "type": "main", "index": 0 }]] }
+    "Form: Write Announcement": {
+      "main": [
+        [
+          {
+            "node": "Fetch All Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch All Users": {
+      "main": [
+        [
+          {
+            "node": "Prepare Emails for Each User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Emails for Each User": {
+      "main": [
+        [
+          {
+            "node": "Send in Batches of 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send in Batches of 5": {
+      "main": [
+        [
+          {
+            "node": "Send Email to User",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Email to User": {
+      "main": [
+        [
+          {
+            "node": "Wait 1s (Rate Limit)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1s (Rate Limit)": {
+      "main": [
+        [
+          {
+            "node": "Send in Batches of 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "id": "nirvana-wf-03"
 }

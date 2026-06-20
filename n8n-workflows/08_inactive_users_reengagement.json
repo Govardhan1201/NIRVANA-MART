@@ -4,14 +4,22 @@
     {
       "parameters": {
         "rule": {
-          "interval": [{ "field": "cronExpression", "expression": "0 10 * * 1" }]
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 1"
+            }
+          ]
         }
       },
       "id": "n08-trigger",
       "name": "Every Monday 10AM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
-      "position": [200, 300]
+      "position": [
+        200,
+        300
+      ]
     },
     {
       "parameters": {
@@ -19,7 +27,12 @@
         "url": "={{ $env.NIRVANA_BASE_URL }}/users",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }]
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.ADMIN_TOKEN }}"
+            }
+          ]
         },
         "options": {}
       },
@@ -27,7 +40,10 @@
       "name": "Fetch All Users",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [420, 300]
+      "position": [
+        420,
+        300
+      ]
     },
     {
       "parameters": {
@@ -39,7 +55,10 @@
       "name": "Fetch Featured Products",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [420, 480]
+      "position": [
+        420,
+        480
+      ]
     },
     {
       "parameters": {
@@ -49,7 +68,10 @@
       "name": "Filter Inactive + Prepare Emails",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 380]
+      "position": [
+        660,
+        380
+      ]
     },
     {
       "parameters": {
@@ -59,7 +81,10 @@
               "id": "c08",
               "leftValue": "={{ $input.all().length }}",
               "rightValue": 0,
-              "operator": { "type": "number", "operation": "gt" }
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
             }
           ],
           "combinator": "and"
@@ -69,7 +94,10 @@
       "name": "Any Inactive Users?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [880, 380]
+      "position": [
+        880,
+        380
+      ]
     },
     {
       "parameters": {
@@ -80,29 +108,27 @@
       "name": "Process in Batches of 3",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [1100, 260]
+      "position": [
+        1100,
+        260
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $json.to }}\"],\n  \"subject\": {{ JSON.stringify($json.subject) }},\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "fromEmail": "NIRVANA MART <nirvanamart0@gmail.com>",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{$json.subject}}",
+        "html": "{{ JSON.stringify($json.html)",
         "options": {}
       },
       "id": "n08-send-email",
       "name": "Send Re-engagement Email",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1320, 260]
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        260
+      ]
     },
     {
       "parameters": {
@@ -113,7 +139,10 @@
       "name": "Rate Limit Wait",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [1320, 100]
+      "position": [
+        1320,
+        100
+      ]
     },
     {
       "parameters": {},
@@ -121,32 +150,118 @@
       "name": "All Users Active ✅",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [1100, 480]
+      "position": [
+        1100,
+        480
+      ]
     }
   ],
   "connections": {
     "Every Monday 10AM": {
       "main": [
         [
-          { "node": "Fetch All Users", "type": "main", "index": 0 },
-          { "node": "Fetch Featured Products", "type": "main", "index": 0 }
+          {
+            "node": "Fetch All Users",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Featured Products",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
-    "Fetch All Users": { "main": [[{ "node": "Filter Inactive + Prepare Emails", "type": "main", "index": 0 }]] },
-    "Fetch Featured Products": { "main": [[{ "node": "Filter Inactive + Prepare Emails", "type": "main", "index": 1 }]] },
-    "Filter Inactive + Prepare Emails": { "main": [[{ "node": "Any Inactive Users?", "type": "main", "index": 0 }]] },
-    "Any Inactive Users?": {
+    "Fetch All Users": {
       "main": [
-        [{ "node": "Process in Batches of 3", "type": "main", "index": 0 }],
-        [{ "node": "All Users Active ✅", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Filter Inactive + Prepare Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
-    "Process in Batches of 3": { "main": [[{ "node": "Send Re-engagement Email", "type": "main", "index": 0 }], []] },
-    "Send Re-engagement Email": { "main": [[{ "node": "Rate Limit Wait", "type": "main", "index": 0 }]] },
-    "Rate Limit Wait": { "main": [[{ "node": "Process in Batches of 3", "type": "main", "index": 0 }]] }
+    "Fetch Featured Products": {
+      "main": [
+        [
+          {
+            "node": "Filter Inactive + Prepare Emails",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter Inactive + Prepare Emails": {
+      "main": [
+        [
+          {
+            "node": "Any Inactive Users?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Inactive Users?": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches of 3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "All Users Active ✅",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process in Batches of 3": {
+      "main": [
+        [
+          {
+            "node": "Send Re-engagement Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Re-engagement Email": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit Wait": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches of 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "id": "nirvana-wf-08"
 }

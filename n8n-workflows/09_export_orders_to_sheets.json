@@ -7,7 +7,10 @@
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [200, 300]
+      "position": [
+        200,
+        300
+      ]
     },
     {
       "parameters": {
@@ -15,7 +18,12 @@
         "url": "={{ $env.NIRVANA_BASE_URL }}/orders",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }]
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.ADMIN_TOKEN }}"
+            }
+          ]
         },
         "options": {}
       },
@@ -23,7 +31,10 @@
       "name": "Fetch All Orders",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [420, 300]
+      "position": [
+        420,
+        300
+      ]
     },
     {
       "parameters": {
@@ -33,13 +44,24 @@
       "name": "Split Into Rows",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [640, 300]
+      "position": [
+        640,
+        300
+      ]
     },
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "value": "={{ $env.GOOGLE_SHEETS_ID }}", "__rl": true, "mode": "id" },
-        "sheetName": { "value": "All Orders", "__rl": true, "mode": "name" },
+        "documentId": {
+          "value": "={{ $env.GOOGLE_SHEETS_ID }}",
+          "__rl": true,
+          "mode": "id"
+        },
+        "sheetName": {
+          "value": "All Orders",
+          "__rl": true,
+          "mode": "name"
+        },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
@@ -61,38 +83,78 @@
       "name": "Append to Google Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
-      "position": [860, 300]
+      "position": [
+        860,
+        300
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $env.ADMIN_EMAIL }}\"],\n  \"subject\": \"✅ Orders exported to Google Sheets successfully\",\n  \"html\": \"<div style='font-family:sans-serif;padding:24px;'><h2 style='color:#10b981;'>✅ Export Complete!</h2><p>All NIRVANA MART orders have been successfully exported to your Google Sheet.</p><p><a href='https://docs.google.com/spreadsheets/d/{{ $env.GOOGLE_SHEETS_ID }}' style='color:#c8923a;font-weight:700;'>Open Google Sheet →</a></p></div>\"\n}",
+        "fromEmail": "NIRVANA MART <nirvanamart0@gmail.com>",
+        "toEmail": "={{ $env.ADMIN_EMAIL }}",
+        "subject": "✅ Orders exported to Google Sheets successfully",
+        "html": "\"<div style='font-family:sans-serif;padding:24px;'><h2 style='color:#10b981;'>✅ Export Complete!</h2><p>All NIRVANA MART orders have been successfully exported to your Google Sheet.</p><p><a href='https://docs.google.com/spreadsheets/d/{{ $env.GOOGLE_SHEETS_ID",
         "options": {}
       },
       "id": "n09-notify",
       "name": "Email Export Confirmation",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1080, 300]
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        300
+      ]
     }
   ],
   "connections": {
-    "Manual Trigger": { "main": [[{ "node": "Fetch All Orders", "type": "main", "index": 0 }]] },
-    "Fetch All Orders": { "main": [[{ "node": "Split Into Rows", "type": "main", "index": 0 }]] },
-    "Split Into Rows": { "main": [[{ "node": "Append to Google Sheets", "type": "main", "index": 0 }]] },
-    "Append to Google Sheets": { "main": [[{ "node": "Email Export Confirmation", "type": "main", "index": 0 }]] }
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch All Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch All Orders": {
+      "main": [
+        [
+          {
+            "node": "Split Into Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Rows": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Email Export Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "id": "nirvana-wf-09"
 }

@@ -34,14 +34,31 @@ Run this command in PowerShell or Command Prompt (replace the values with your o
 ```bash
 docker stop n8n
 docker rm n8n
-docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n -e N8N_BLOCK_ENV_ACCESS_IN_NODE="false" -e NIRVANA_BASE_URL="https://nirvana-mart.onrender.com/api" -e ADMIN_TOKEN="your_jwt_admin_token" -e RESEND_API_KEY="your_resend_api_key" -e ADMIN_EMAIL="nirvanamart0@gmail.com" -e GOOGLE_SHEETS_ID="your_google_sheets_id" n8nio/n8n
+docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n -e N8N_BLOCK_ENV_ACCESS_IN_NODE="false" -e NIRVANA_BASE_URL="https://nirvana-mart.onrender.com/api" -e ADMIN_TOKEN="your_jwt_admin_token" -e ADMIN_EMAIL="nirvanamart0@gmail.com" -e GOOGLE_SHEETS_ID="your_google_sheets_id" n8nio/n8n
 ```
 
 > **How to get ADMIN_TOKEN:** Log into the admin panel in Chrome → F12 → Application → Local Storage → copy `vm_token`
 
 ---
 
-### Step 2: Import Workflows
+### Step 2: Set Up SMTP Credentials in n8n
+
+The workflows now use n8n's native **Send Email (SMTP)** node to send emails via Gmail. You must configure the SMTP credentials in your n8n dashboard:
+
+1. Open n8n: `http://localhost:5678`
+2. Go to **Credentials** in the left sidebar.
+3. Click **Add Credential** and search for **SMTP**.
+4. Configure the SMTP fields:
+   * **Host:** `smtp.gmail.com`
+   * **Port:** `465` (SSL) or `587` (TLS)
+   * **SSL/TLS:** Toggle **On** (if using port 465)
+   * **User:** `nirvanamart0@gmail.com`
+   * **Password:** *[Your 16-character Google App Password]*
+5. Click **Save**. When importing the workflows, n8n will ask you to select this SMTP account.
+
+---
+
+### Step 3: Import Workflows
 
 1. Open n8n: `http://localhost:5678`
 2. Click **"+"** to create a new workflow
@@ -51,7 +68,7 @@ docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n -e N8N_BLOCK_E
 
 ---
 
-### Step 3: Set Up Google Sheets (Workflows 02, 07, 09)
+### Step 4: Set Up Google Sheets (Workflows 02, 07, 09)
 
 1. Create a new Google Sheet
 2. Add these sheets (tabs):
@@ -64,7 +81,7 @@ docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n -e N8N_BLOCK_E
 
 ---
 
-### Step 4: Set Up Webhook Workflows (04, 05, 06)
+### Step 5: Set Up Webhook Workflows (04, 05, 06)
 
 These need your local n8n to be reachable from the internet.
 
@@ -142,11 +159,11 @@ docker logs n8n --tail 50
 ## 🔔 Email Templates Used
 
 All emails use the NIRVANA MART brand:
-- **From:** `NIRVANA MART <onboarding@resend.dev>`
+- **From:** `NIRVANA MART <nirvanamart0@gmail.com>`
 - **Colors:** Amber `#c8923a` | Dark `#0a0a14` | Green `#10b981`
 - **Font:** Segoe UI, system fonts
 
-> Note: With Resend free tier (onboarding@resend.dev), emails only go to verified addresses. To send to any address, verify your domain at resend.com/domains.
+> Note: Using Gmail SMTP via Google App Passwords allows you to send up to 500 emails/day to any recipient for free. There are no domain verification restrictions!
 
 ---
 

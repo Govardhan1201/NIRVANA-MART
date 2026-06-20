@@ -14,15 +14,25 @@ const path = require('path');
 const xlsx = require('xlsx');
 const fs = require('fs');
 
-// ─── Resend Email Client ───────────────────────────────────────────────────────────────
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
+// ─── Gmail SMTP Email Client (Nodemailer) ────────────────────────────────────────────────
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER || 'nirvanamart0@gmail.com',
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 async function sendEmail({ to, subject, html }) {
-  if (!process.env.RESEND_API_KEY || !to) return;
+  if (!process.env.EMAIL_PASS || !to) {
+    console.warn('Email sending skipped: EMAIL_PASS or recipient missing.');
+    return;
+  }
   try {
-    await resend.emails.send({
-      from: 'NIRVANA MART <onboarding@resend.dev>', // Use resend.dev until your domain is verified
+    await transporter.sendMail({
+      from: `"NIRVANA MART" <${process.env.EMAIL_USER || 'nirvanamart0@gmail.com'}>`,
       to,
       subject,
       html
@@ -31,6 +41,7 @@ async function sendEmail({ to, subject, html }) {
     console.warn('Email send failed:', e.message);
   }
 }
+
 
 // ─── Cloudinary Setup ──────────────────────────────────────────────────────────────────
 const cloudinary = require('cloudinary').v2;

@@ -7,7 +7,10 @@
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [200, 300]
+      "position": [
+        200,
+        300
+      ]
     },
     {
       "parameters": {
@@ -15,7 +18,12 @@
         "url": "={{ $env.NIRVANA_BASE_URL }}/products/all",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }]
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.ADMIN_TOKEN }}"
+            }
+          ]
         },
         "options": {}
       },
@@ -23,7 +31,10 @@
       "name": "Fetch All Products (Admin)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [420, 300]
+      "position": [
+        420,
+        300
+      ]
     },
     {
       "parameters": {
@@ -33,7 +44,10 @@
       "name": "Identify Stale Listings",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [640, 300]
+      "position": [
+        640,
+        300
+      ]
     },
     {
       "parameters": {
@@ -43,7 +57,10 @@
       "name": "Split Products to Delete",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [860, 200]
+      "position": [
+        860,
+        200
+      ]
     },
     {
       "parameters": {
@@ -51,53 +68,102 @@
         "url": "={{ $env.NIRVANA_BASE_URL }}/products/{{ $json.id }}",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.ADMIN_TOKEN }}" }]
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.ADMIN_TOKEN }}"
+            }
+          ]
         },
-        "options": { "response": { "response": { "neverError": true } } }
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       },
       "id": "n10-delete",
       "name": "Delete Stale Product",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1080, 200]
+      "position": [
+        1080,
+        200
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART <onboarding@resend.dev>\",\n  \"to\": [\"{{ $env.ADMIN_EMAIL }}\"],\n  \"subject\": \"🧹 Database Cleanup Complete — NIRVANA MART\",\n  \"html\": \"<div style='font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;'><div style='background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:24px;border-radius:10px;text-align:center;color:white;margin-bottom:20px;'><h1 style='margin:0;'>🧹 Cleanup Done!</h1></div><div style='background:white;border:1px solid #e5e7eb;padding:20px;border-radius:10px;'><p style='color:#333;'>Database cleanup completed successfully.</p><table style='width:100%;border-collapse:collapse;'><tr style='border-bottom:1px solid #eee;'><td style='padding:10px;color:#666;'>Rejected listings deleted</td><td style='padding:10px;font-weight:700;color:#ef4444;'>{{ $('Identify Stale Listings').first().json.deleteCount }}</td></tr><tr><td style='padding:10px;color:#666;'>Stuck pending listings flagged</td><td style='padding:10px;font-weight:700;color:#f59e0b;'>{{ $('Identify Stale Listings').first().json.stuckCount }}</td></tr></table><p style='color:#555;margin-top:16px;'>Please manually review the {{ $('Identify Stale Listings').first().json.stuckCount }} pending products that have been waiting for 7+ days.</p><a href='https://nirvana-mart.onrender.com/nirvanamart-admin-portal' style='display:inline-block;background:#c8923a;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:12px;'>Review Admin Panel →</a></div></div>\"\n}",
+        "fromEmail": "NIRVANA MART <nirvanamart0@gmail.com>",
+        "toEmail": "={{ $env.ADMIN_EMAIL }}",
+        "subject": "🧹 Database Cleanup Complete — NIRVANA MART",
+        "html": "\"<div style='font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;'><div style='background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:24px;border-radius:10px;text-align:center;color:white;margin-bottom:20px;'><h1 style='margin:0;'>🧹 Cleanup Done!</h1></div><div style='background:white;border:1px solid #e5e7eb;padding:20px;border-radius:10px;'><p style='color:#333;'>Database cleanup completed successfully.</p><table style='width:100%;border-collapse:collapse;'><tr style='border-bottom:1px solid #eee;'><td style='padding:10px;color:#666;'>Rejected listings deleted</td><td style='padding:10px;font-weight:700;color:#ef4444;'>{{ $('Identify Stale Listings').first().json.deleteCount",
         "options": {}
       },
       "id": "n10-summary",
       "name": "Email Cleanup Summary",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1080, 420]
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        420
+      ]
     }
   ],
   "connections": {
-    "Manual Trigger": { "main": [[{ "node": "Fetch All Products (Admin)", "type": "main", "index": 0 }]] },
-    "Fetch All Products (Admin)": { "main": [[{ "node": "Identify Stale Listings", "type": "main", "index": 0 }]] },
-    "Identify Stale Listings": {
+    "Manual Trigger": {
       "main": [
         [
-          { "node": "Split Products to Delete", "type": "main", "index": 0 },
-          { "node": "Email Cleanup Summary", "type": "main", "index": 0 }
+          {
+            "node": "Fetch All Products (Admin)",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
-    "Split Products to Delete": { "main": [[{ "node": "Delete Stale Product", "type": "main", "index": 0 }]] }
+    "Fetch All Products (Admin)": {
+      "main": [
+        [
+          {
+            "node": "Identify Stale Listings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Identify Stale Listings": {
+      "main": [
+        [
+          {
+            "node": "Split Products to Delete",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email Cleanup Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Products to Delete": {
+      "main": [
+        [
+          {
+            "node": "Delete Stale Product",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "id": "nirvana-wf-10"
 }

@@ -4,14 +4,22 @@
     {
       "parameters": {
         "rule": {
-          "interval": [{ "field": "cronExpression", "expression": "*/14 * * * *" }]
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/14 * * * *"
+            }
+          ]
         }
       },
       "id": "n07-trigger",
       "name": "Every 14 Minutes",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
-      "position": [200, 300]
+      "position": [
+        200,
+        300
+      ]
     },
     {
       "parameters": {
@@ -19,14 +27,21 @@
         "url": "https://nirvana-mart.onrender.com/api/products",
         "options": {
           "timeout": 30000,
-          "response": { "response": { "neverError": true } }
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
         }
       },
       "id": "n07-ping",
       "name": "Ping Server",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [420, 300]
+      "position": [
+        420,
+        300
+      ]
     },
     {
       "parameters": {
@@ -36,7 +51,10 @@
       "name": "Check Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [640, 300]
+      "position": [
+        640,
+        300
+      ]
     },
     {
       "parameters": {
@@ -46,7 +64,10 @@
               "id": "c07",
               "leftValue": "={{ $json.status }}",
               "rightValue": "ERROR",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -56,35 +77,41 @@
       "name": "Server Down?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [860, 300]
+      "position": [
+        860,
+        300
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"NIRVANA MART Alerts <onboarding@resend.dev>\",\n  \"to\": [\"{{ $env.ADMIN_EMAIL }}\"],\n  \"subject\": \"🚨 NIRVANA MART Server Possibly Down!\",\n  \"html\": \"<div style='font-family:sans-serif;max-width:500px;margin:0 auto;'><div style='background:#dc2626;padding:24px;border-radius:10px;text-align:center;color:white;'><h1 style='margin:0;'>🚨 Server Alert</h1><p style='margin:8px 0 0;opacity:0.85;'>Detected at {{ $json.timestamp }}</p></div><div style='background:white;border:1px solid #fecaca;padding:20px;border-radius:0 0 10px 10px;'><p>The NIRVANA MART server returned an unexpected response. It may be down or having issues.</p><p><strong>Check:</strong> <a href='https://nirvana-mart.onrender.com'>https://nirvana-mart.onrender.com</a></p><p><strong>Admin Panel:</strong> <a href='https://dashboard.render.com'>Render Dashboard</a></p></div></div>\"\n}",
+        "fromEmail": "NIRVANA MART <nirvanamart0@gmail.com>",
+        "toEmail": "={{ $env.ADMIN_EMAIL }}",
+        "subject": "🚨 NIRVANA MART Server Possibly Down!",
+        "html": "\"<div style='font-family:sans-serif;max-width:500px;margin:0 auto;'><div style='background:#dc2626;padding:24px;border-radius:10px;text-align:center;color:white;'><h1 style='margin:0;'>🚨 Server Alert</h1><p style='margin:8px 0 0;opacity:0.85;'>Detected at {{ $json.timestamp",
         "options": {}
       },
       "id": "n07-alert-email",
       "name": "Send Down Alert Email",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1080, 200]
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        200
+      ]
     },
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "value": "={{ $env.GOOGLE_SHEETS_ID }}", "__rl": true, "mode": "id" },
-        "sheetName": { "value": "Uptime Log", "__rl": true, "mode": "name" },
+        "documentId": {
+          "value": "={{ $env.GOOGLE_SHEETS_ID }}",
+          "__rl": true,
+          "mode": "id"
+        },
+        "sheetName": {
+          "value": "Uptime Log",
+          "__rl": true,
+          "mode": "name"
+        },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
@@ -98,7 +125,10 @@
       "name": "Log to Google Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
-      "position": [1080, 420]
+      "position": [
+        1080,
+        420
+      ]
     },
     {
       "parameters": {},
@@ -106,24 +136,73 @@
       "name": "Server OK ✅",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [1080, 580]
+      "position": [
+        1080,
+        580
+      ]
     }
   ],
   "connections": {
-    "Every 14 Minutes": { "main": [[{ "node": "Ping Server", "type": "main", "index": 0 }]] },
-    "Ping Server": { "main": [[{ "node": "Check Response", "type": "main", "index": 0 }]] },
-    "Check Response": { "main": [[{ "node": "Server Down?", "type": "main", "index": 0 }]] },
+    "Every 14 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Ping Server",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ping Server": {
+      "main": [
+        [
+          {
+            "node": "Check Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Response": {
+      "main": [
+        [
+          {
+            "node": "Server Down?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Server Down?": {
       "main": [
-        [{ "node": "Send Down Alert Email", "type": "main", "index": 0 }],
         [
-          { "node": "Log to Google Sheets", "type": "main", "index": 0 },
-          { "node": "Server OK ✅", "type": "main", "index": 0 }
+          {
+            "node": "Send Down Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Server OK ✅",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "id": "nirvana-wf-07"
 }

@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "nirvana-mart",
   "version": "2.0.0",
   "description": "Nirvana Campus E-commerce Platform",
@@ -20,6 +20,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^9.0.1",
     "pdfkit": "^0.18.0",
     "resend": "^6.9.4",
     "socket.io": "^4.8.3",
