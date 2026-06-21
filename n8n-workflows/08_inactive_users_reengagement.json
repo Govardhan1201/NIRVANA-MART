@@ -24,7 +24,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.NIRVANA_BASE_URL }}/users",
+        "url": "={{ $env.NIRVANA_BASE_URL }}/admin/users",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

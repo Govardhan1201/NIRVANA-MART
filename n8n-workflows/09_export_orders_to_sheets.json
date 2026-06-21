@@ -15,7 +15,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.NIRVANA_BASE_URL }}/orders",
+        "url": "={{ $env.NIRVANA_BASE_URL }}/orders/all",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
