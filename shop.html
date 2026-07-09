@@ -63,12 +63,12 @@
 <body>
 <canvas id="particleCanvas"></canvas>
 <!-- Loader -->
-<div class="page-loader" id="pageLoader"><div class="loader-logo"><img src="LOGO.png" alt="Nirvana Mart" class="loader-logo-img"></div><div class="loader-bar"><div class="loader-bar-fill"></div></div></div>
+<div class="page-loader" id="pageLoader"><div class="loader-logo"><img loading="lazy" src="LOGO.png" alt="Nirvana Mart" class="loader-logo-img"></div><div class="loader-bar"><div class="loader-bar-fill"></div></div></div>
 
 <!-- Navbar -->
 <nav class="navbar">
   <div class="navbar-inner container">
-    <a href="index.html" class="nav-logo"><img src="LOGO.png" alt="Nirvana Mart" class="nav-logo-img"></a>
+    <a href="index.html" class="nav-logo"><img loading="lazy" src="LOGO.png" alt="Nirvana Mart" class="nav-logo-img"></a>
     <div class="nav-search">
       <i class="fas fa-search search-icon"></i>
       <input type="text" id="searchInput" placeholder="Search products, services..." oninput="handleSearch(this.value)" autocomplete="off">
@@ -233,7 +233,7 @@
     <div id="upiQR" style="display:none;text-align:center;margin-bottom:16px;">
       <p style="font-weight:700;margin-bottom:10px;">Scan to Pay</p>
       <div style="display:inline-block;background:white;padding:12px;border-radius:12px;">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=nirvanamart@upi" alt="UPI QR" style="width:150px;height:150px;">
+        <img loading="lazy" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=nirvanamart@upi" alt="UPI QR" style="width:150px;height:150px;">
       </div>
       <p style="font-size:0.82rem;color:var(--text-muted);margin-top:8px;">UPI ID: nirvanamart@upi</p>
     </div>
@@ -475,7 +475,7 @@ function renderProductCard(p) {
   return `
     <div class="product-card card-3d" onclick="openProductDetail(${p.id})" style="position:relative;">
       <div style="overflow:hidden;position:relative;">
-        <img src="${cloudinaryOptimize(p.image_url, 400)}" alt="${p.title}" class="product-card-img" loading="lazy">
+        <img loading="lazy" src="${cloudinaryOptimize(p.image_url, 400)}" alt="${p.title}" class="product-card-img" loading="lazy">
         ${disc>0 ? `<span style="position:absolute;top:10px;left:10px;background:var(--accent-red);color:white;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:800;">${disc}% OFF</span>` : ''}
         ${p.eco ? `<span style="position:absolute;top:10px;right:10px;background:rgba(16,185,129,0.9);color:white;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:800;">≡ƒî┐ Eco</span>` : ''}
       </div>
@@ -519,13 +519,13 @@ async function openProductDetail(id) {
   const images = (p.images && p.images.length > 0) ? p.images : [p.image_url];
   const imageCarousel = images.length > 1 
     ? `<div class="carousel-wrap" style="position:relative; width:100%;">
-         <img src="${images[0]}" alt="${p.title}" id="mainProdImg" style="width:100%;height:280px;object-fit:cover;border-radius:16px;">
+         <img loading="lazy" src="${images[0]}" alt="${p.title}" id="mainProdImg" style="width:100%;height:280px;object-fit:cover;border-radius:16px;">
          <div style="display:flex; justify-content:flex-start; gap:8px; margin-top:12px; overflow-x:auto; padding-bottom:8px;">
-           ${images.map((img, i) => `<img src="${img}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid ${i===0?'var(--accent-primary)':'transparent'}; transition:all 0.2s;" onclick="document.getElementById('mainProdImg').src=this.src; Array.from(this.parentElement.children).forEach(c=>c.style.border='2px solid transparent'); this.style.border='2px solid var(--accent-primary)';">`).join('')}
+           ${images.map((img, i) => `<img loading="lazy" src="${img}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid ${i===0?'var(--accent-primary)':'transparent'}; transition:all 0.2s;" onclick="document.getElementById('mainProdImg').src=this.src; Array.from(this.parentElement.children).forEach(c=>c.style.border='2px solid transparent'); this.style.border='2px solid var(--accent-primary)';">`).join('')}
          </div>
        </div>`
     : `<div class="zoom-wrap">
-        <img src="${images[0]}" alt="${p.title}" style="height:280px;object-fit:cover;width:100%;border-radius:16px;">
+        <img loading="lazy" src="${images[0]}" alt="${p.title}" style="height:280px;object-fit:cover;width:100%;border-radius:16px;">
         <span class="zoom-badge">≡ƒöì Hover to Zoom</span>
       </div>`;
 
@@ -535,7 +535,7 @@ async function openProductDetail(id) {
       <div>
         ${is360 ? `<div class="spin-360-wrap">
           <div class="spin-360-badge">Γå║ 360┬░</div>
-          <img src="${images[0]}" alt="${p.title}" style="width:100%;height:280px;object-fit:cover;transition:transform 0.4s;border-radius:16px;" id="spin360img">
+          <img loading="lazy" src="${images[0]}" alt="${p.title}" style="width:100%;height:280px;object-fit:cover;transition:transform 0.4s;border-radius:16px;" id="spin360img">
         </div>
         <button onclick="document.getElementById('spin360img').classList.toggle('spinning')" class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;"><i class="fas fa-sync"></i> Toggle 360┬░</button>` :
         imageCarousel}
@@ -599,6 +599,31 @@ async function openProductDetail(id) {
   openModal('productModal');
   loadReviews(p.id);
   loadRelated(p.id, p.category);
+
+  // Inject Product JSON-LD
+  let ldScript = document.getElementById('product-ld');
+  if (!ldScript) {
+    ldScript = document.createElement('script');
+    ldScript.id = 'product-ld';
+    ldScript.type = 'application/ld+json';
+    document.head.appendChild(ldScript);
+  }
+  ldScript.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": p.title,
+    "image": images,
+    "description": p.description,
+    "sku": p.id.toString(),
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "INR",
+      "price": p.price,
+      "itemCondition": p.condition.toLowerCase().includes('new') ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition",
+      "availability": p.quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+    }
+  });
 }
 
 // ΓöÇΓöÇΓöÇ Cart ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
@@ -647,7 +672,7 @@ function renderCartDrawer() {
   }
   document.getElementById('cartBody').innerHTML = cart.map(item => `
     <div class="cart-item">
-      <img src="${item.image_url}" alt="${item.title}">
+      <img loading="lazy" src="${item.image_url}" alt="${item.title}">
       <div class="cart-item-info">
         <div class="cart-item-title">${item.title}</div>
         <div style="font-size:0.78rem;color:var(--text-muted);">${item.condition}</div>
@@ -730,7 +755,7 @@ function openWishlistModal() {
   } else {
     document.getElementById('wishlistBody').innerHTML = wishlist.map(item => `
       <div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border-color);align-items:center;">
-        <img src="${item.image_url}" style="width:60px;height:60px;object-fit:cover;border-radius:12px;" onclick="closeModal('wishlistModal');openProductDetail(${item.id});" style="cursor:pointer;">
+        <img loading="lazy" src="${item.image_url}" style="width:60px;height:60px;object-fit:cover;border-radius:12px;" onclick="closeModal('wishlistModal');openProductDetail(${item.id});" style="cursor:pointer;">
         <div style="flex:1;">
           <div style="font-weight:700;font-size:0.9rem;cursor:pointer;" onclick="closeModal('wishlistModal');openProductDetail(${item.id});">${item.title}</div>
           <div style="color:var(--accent-primary);font-weight:800;margin-top:2px;">Γé╣${item.price.toLocaleString()}</div>
@@ -910,7 +935,7 @@ async function loadRelated(currentId, category) {
   el.innerHTML = `<h3 style="font-weight:800;margin-bottom:14px;">≡ƒôª Related Products</h3>
     <div class="related-strip">${related.map(p=>`
       <div class="related-card" onclick="closeModal('productModal');setTimeout(()=>openProductDetail(${p.id}),150)">
-        <img src="${p.image_url}" alt="${p.title}" loading="lazy">
+        <img loading="lazy" src="${p.image_url}" alt="${p.title}" loading="lazy">
         <div class="related-card-body">
           <div class="related-card-title">${p.title}</div>
           <div class="related-card-price">Γé╣${p.price.toLocaleString()}</div>

@@ -75,13 +75,29 @@ const io = new SocketServer(httpServer, {
 });
 
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'nirvanamart-secret';
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'ADMIN2025';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin123';
+const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!JWT_SECRET || !ADMIN_SECRET || !ADMIN_PASSWORD) {
+  console.error("CRITICAL ERROR: Missing required security environment variables (JWT_SECRET, ADMIN_SECRET, ADMIN_PASSWORD).");
+  process.exit(1);
+}
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
-app.use(helmet({ contentSecurityPolicy: false })); // disable CSP for inline scripts
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com", "https://images.unsplash.com"],
+      fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "ws:", "wss:"],
+    }
+  }
+}));
 app.use(cors({
   origin: (origin, cb) => {
     // Allow requests from the configured origin, localhost, Render domain, or same-origin (no `origin` header)
@@ -95,10 +111,14 @@ app.use(cookieParser());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(express.static(path.join(__dirname), {
+  maxAge: '1d', // Cache static assets for 1 day
   setHeaders(res, filePath) {
     if (filePath.endsWith('.webmanifest')) res.setHeader('Content-Type', 'application/manifest+json');
     if (filePath.endsWith('.svg'))         res.setHeader('Content-Type', 'image/svg+xml');
-    if (filePath.endsWith('sw.js'))        res.setHeader('Service-Worker-Allowed', '/');
+    if (filePath.endsWith('sw.js')) {
+        res.setHeader('Service-Worker-Allowed', '/');
+        res.setHeader('Cache-Control', 'no-store'); // Never cache service worker
+    }
   }
 }));
 
@@ -487,12 +507,7 @@ app.post('/api/auth/admin-login', loginLimiter, async (req, res) => {
 
     let adminUser = await db.get("SELECT * FROM users WHERE role = 'admin'");
     if (!adminUser) {
-      const hash = await bcrypt.hash(ADMIN_PASSWORD, 10);
-      const result = await db.run(
-        'INSERT INTO users (name,roll_number,branch,year,phone,email,password_hash,role) VALUES (?,?,?,?,?,?,?,?)',
-        ['Admin', 'ADMIN001', 'Admin', '0', '0000000000', 'nirvanamart0@gmail.com', hash, 'admin']
-      );
-      adminUser = await db.get('SELECT * FROM users WHERE id = ?', [result.lastID]);
+      return res.status(401).json({ error: 'Admin account not found in database. Please seed it manually.' });
     }
     const user = { id: adminUser.id, name: adminUser.name, rollNumber: adminUser.roll_number, phone: adminUser.phone, email: adminUser.email, role: 'admin' };
     const token = jwt.sign(user, JWT_SECRET, { expiresIn: '8h' });
@@ -706,30 +721,43 @@ app.post('/api/orders', authenticate, async (req, res) => {
       const sellerPayout = Math.max(0, product.price - listingFee);
       const orderId = `${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
 
-      await db.run(
+      const ops = [];
+
+      ops.push(db.run(
         "INSERT INTO orders (id,product_id,product_title,product_image,buyer_roll,buyer_name,buyer_phone,seller_roll,seller_name,seller_phone,payment_method,product_price,service_fee,platform_charge,total_paid,listing_fee,seller_payout,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending')",
         [orderId, product.id, product.title, product.image_url, req.user.rollNumber, req.user.name, req.user.phone, product.seller_roll, product.seller_name, product.seller_phone, paymentMethod, product.price, serviceFee, platformCharge, totalPaid, listingFee, sellerPayout]
-      );
-      await db.run('UPDATE products SET quantity = MAX(0, quantity - 1) WHERE id = ?', [product.id]);
-      // Auto-delete product when stock hits 0
-      const updatedProd = await db.get('SELECT quantity FROM products WHERE id = ?', [product.id]);
-      if (updatedProd && updatedProd.quantity <= 0) {
-        await db.run('DELETE FROM products WHERE id = ?', [product.id]);
-      }
-      // Increment coupon usage if coupon code was applied in this order item
+      ));
+
+      const updateStock = async () => {
+        await db.run('UPDATE products SET quantity = MAX(0, quantity - 1) WHERE id = ?', [product.id]);
+        const updatedProd = await db.get('SELECT quantity FROM products WHERE id = ?', [product.id]);
+        if (updatedProd && updatedProd.quantity <= 0) {
+          await db.run('DELETE FROM products WHERE id = ?', [product.id]);
+        }
+      };
+      ops.push(updateStock());
+
       if (item.couponCode) {
-        await db.run("UPDATE coupons SET used_count = used_count + 1 WHERE code = ? AND is_active = 1", [item.couponCode.toUpperCase()]);
+        ops.push(db.run("UPDATE coupons SET used_count = used_count + 1 WHERE code = ? AND is_active = 1", [item.couponCode.toUpperCase()]));
       }
-      await db.run('INSERT INTO notifications (user_roll,title,message) VALUES (?,?,?)',
-        [product.seller_roll, '🛒 New Order!', `Someone ordered your "${product.title}". Check your dashboard.`]);
+      
+      ops.push(db.run('INSERT INTO notifications (user_roll,title,message) VALUES (?,?,?)',
+        [product.seller_roll, '🛒 New Order!', `Someone ordered your "${product.title}". Check your dashboard.`]));
+      
+      if (admin) {
+        ops.push(db.run('INSERT INTO notifications (user_roll,title,message) VALUES (?,?,?)',
+          [admin.roll_number, '📦 New Order', `${req.user.name} ordered "${product.title}" (₹${totalPaid})`]));
+      }
+      
+      ops.push(db.run('UPDATE earnings SET service_fees=service_fees+?, listing_fees=listing_fees+?, extra_charges=extra_charges+?, total=total+? WHERE id=1',
+        [serviceFee, listingFee, platformCharge, serviceFee + listingFee + platformCharge]));
+
+      await Promise.all(ops);
+      
       io.to(`user:${product.seller_roll}`).emit('notification:new');
       if (admin) {
-        await db.run('INSERT INTO notifications (user_roll,title,message) VALUES (?,?,?)',
-          [admin.roll_number, '📦 New Order', `${req.user.name} ordered "${product.title}" (₹${totalPaid})`]);
         io.to(`user:${admin.roll_number}`).emit('notification:new');
       }
-      await db.run('UPDATE earnings SET service_fees=service_fees+?, listing_fees=listing_fees+?, extra_charges=extra_charges+?, total=total+? WHERE id=1',
-        [serviceFee, listingFee, platformCharge, serviceFee + listingFee + platformCharge]);
         
       createdOrders.push({ id: orderId, title: product.title, price: product.price, sellerRoll: product.seller_roll });
     }
@@ -1414,6 +1442,28 @@ pages.forEach(p => {
 });
 // Admin portal accessible only at hidden URL — not linked publicly
 app.get('/nirvanamart-admin-portal', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+
+// ─── SEO ──────────────────────────────────────────────────────────────────────
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`User-agent: *\nDisallow: /api/\nDisallow: /nirvanamart-admin-portal\nSitemap: https://nirvana-mart.onrender.com/sitemap.xml`);
+});
+
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    let urls = `<url><loc>https://nirvana-mart.onrender.com/</loc><changefreq>daily</changefreq></url>\n`;
+    urls += `<url><loc>https://nirvana-mart.onrender.com/shop</loc><changefreq>hourly</changefreq></url>\n`;
+    urls += `<url><loc>https://nirvana-mart.onrender.com/login</loc></url>\n`;
+    urls += `<url><loc>https://nirvana-mart.onrender.com/register</loc></url>\n`;
+    urls += `<url><loc>https://nirvana-mart.onrender.com/corners</loc></url>\n`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>`;
+    res.type('application/xml');
+    res.send(xml);
+  } catch (err) { res.status(500).end(); }
+});
 
 // Catch-all for 404 Not Found
 app.get('*', (req, res) => res.status(404).sendFile(path.join(__dirname, '404.html')));
