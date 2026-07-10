@@ -5,7 +5,7 @@
 //             Offline fallback = 404.html
 // ═══════════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'nirvanamart-v2';
+const CACHE_NAME = 'nirvanamart-v3';
 const OFFLINE_PAGE = '/404.html';
 
 // Static shell assets — cache on install
