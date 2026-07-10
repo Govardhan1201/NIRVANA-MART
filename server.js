@@ -111,8 +111,12 @@ app.use(cookieParser());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(express.static(path.join(__dirname), {
-  maxAge: '1d', // Cache static assets for 1 day
   setHeaders(res, filePath) {
+    if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache'); // Revalidate HTML
+    } else {
+        res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache static assets for 1 day
+    }
     if (filePath.endsWith('.webmanifest')) res.setHeader('Content-Type', 'application/manifest+json');
     if (filePath.endsWith('.svg'))         res.setHeader('Content-Type', 'image/svg+xml');
     if (filePath.endsWith('sw.js')) {
