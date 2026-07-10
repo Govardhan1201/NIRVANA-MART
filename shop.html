@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Browse and shop for campus essentials like books, electronics, fashion, and services at Nirvana Mart.">
-  <title>Shop ΓÇö NIRVANA MART</title>
+  <title>Shop — NIRVANA MART</title>
   <link rel="stylesheet" href="shared/css/main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -100,8 +100,8 @@
         <img id="userAvatarImg" src="" alt="User" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">
         <div class="dropdown-panel" id="userDropdown">
           <div class="dropdown-header"><div id="ddName" style="font-weight:700;"></div><div id="ddRole" style="font-size:0.8rem;color:var(--text-muted);text-transform:capitalize;"></div></div>
-          <div class="dropdown-item" onclick="goDashboard()"><div class="di-icon" style="background:rgba(99,102,241,0.1);">≡ƒôè</div>Dashboard</div>
-          <div class="dropdown-item" onclick="Auth.logout()"><div class="di-icon" style="background:rgba(239,68,68,0.08);">≡ƒÜ¬</div><span style="color:var(--accent-red)">Logout</span></div>
+          <div class="dropdown-item" onclick="goDashboard()"><div class="di-icon" style="background:rgba(99,102,241,0.1);">🗂️</div>Dashboard</div>
+          <div class="dropdown-item" onclick="Auth.logout()"><div class="di-icon" style="background:rgba(239,68,68,0.08);">🚪</div><span style="color:var(--accent-red)">Logout</span></div>
         </div>
       </div>
     </div>
@@ -112,14 +112,14 @@
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
   <div class="cart-drawer-header">
-    <h2 style="font-size:1.3rem;font-weight:800;">≡ƒ¢Æ Your Cart</h2>
-    <button onclick="closeCart()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--text-muted);">Γ£ò</button>
+    <h2 style="font-size:1.3rem;font-weight:800;">🛒 Your Cart</h2>
+    <button onclick="closeCart()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--text-muted);">✕</button>
   </div>
   <div class="cart-drawer-body" id="cartBody"><p style="text-align:center;padding:40px;color:var(--text-muted);">Your cart is empty</p></div>
   <div class="cart-drawer-footer">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <span style="font-weight:700;">Total</span>
-      <span style="font-size:1.5rem;font-weight:800;color:var(--accent-primary);" id="cartTotal">Γé╣0</span>
+      <span style="font-size:1.5rem;font-weight:800;color:var(--accent-primary);" id="cartTotal">₹0</span>
     </div>
     <button class="btn btn-primary btn-full" onclick="proceedCheckout()"><i class="fas fa-credit-card"></i> Checkout</button>
   </div>
@@ -161,8 +161,8 @@
         </ul>
         <div class="sidebar-title" style="margin-top:24px;">Price Range</div>
         <div style="display:flex;gap:8px;">
-          <input type="number" id="minPrice" class="form-control" placeholder="Min Γé╣" oninput="applyFilters()">
-          <input type="number" id="maxPrice" class="form-control" placeholder="Max Γé╣" oninput="applyFilters()">
+          <input type="number" id="minPrice" class="form-control" placeholder="Min ₹" oninput="applyFilters()">
+          <input type="number" id="maxPrice" class="form-control" placeholder="Max ₹" oninput="applyFilters()">
         </div>
         <div class="sidebar-title" style="margin-top:24px;">Condition</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
@@ -183,8 +183,8 @@
             <label style="font-size:0.85rem;color:var(--text-muted);font-weight:600;">Sort by</label>
             <select class="sort-select" id="sortSelect" onchange="applyFilters()">
               <option value="newest">Newest First</option>
-              <option value="price-low">Price: Low ΓåÆ High</option>
-              <option value="price-high">Price: High ΓåÆ Low</option>
+              <option value="price-low">Price: Low → High</option>
+              <option value="price-high">Price: High → Low</option>
               <option value="rating">Best Rating</option>
             </select>
           </div>
@@ -214,7 +214,7 @@
 <div class="modal-overlay" id="paymentModal">
   <div class="modal-box modal-sm">
     <button class="modal-close" onclick="closeModal('paymentModal')"><i class="fas fa-times"></i></button>
-    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:8px;">≡ƒÆ│ Checkout</h2>
+    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:8px;">💳 Checkout</h2>
     <div style="background:var(--bg-primary);border-radius:12px;padding:14px;margin-bottom:16px;" id="paymentSummary"></div>
     <!-- Coupon -->
     <div class="coupon-row">
@@ -245,7 +245,7 @@
 <div class="modal-overlay" id="wishlistModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('wishlistModal')"><i class="fas fa-times"></i></button>
-    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:20px;">Γ¥ñ∩╕Å Wishlist</h2>
+    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:20px;">❤️ Wishlist</h2>
     <div id="wishlistBody"></div>
   </div>
 </div>
@@ -254,16 +254,16 @@
 <div class="modal-overlay" id="sellModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('sellModal')"><i class="fas fa-times"></i></button>
-    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:20px;">≡ƒôª List a Product</h2>
+    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:20px;">📦 List a Product</h2>
     <form id="sellForm" onsubmit="submitProduct(event)">
-      <div class="form-group"><label class="form-label required">Product Title</label><input type="text" id="pTitle" class="form-control" placeholder="e.g., iPhone 13 ΓÇö Like New" required></div>
+      <div class="form-group"><label class="form-label required">Product Title</label><input type="text" id="pTitle" class="form-control" placeholder="e.g., iPhone 13 — Like New" required></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div class="form-group"><label class="form-label required">Category</label><select id="pCategory" class="form-control" required><option value="electronics">Electronics</option><option value="books">Books &amp; Notes</option><option value="fashion">Fashion</option><option value="instruments">Instruments</option><option value="services">Services</option><option value="sports">Sports</option></select></div>
         <div class="form-group"><label class="form-label required">Condition</label><select id="pCondition" class="form-control" required><option value="New">New</option><option value="Like New">Like New</option><option value="Good">Good</option><option value="Fair">Fair</option></select></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <div class="form-group"><label class="form-label required">Selling Price (Γé╣)</label><input type="number" id="pPrice" class="form-control" placeholder="5000" min="1" required></div>
-        <div class="form-group"><label class="form-label">Original Price (Γé╣)</label><input type="number" id="pOriginal" class="form-control" placeholder="Optional" min="1"></div>
+        <div class="form-group"><label class="form-label required">Selling Price (₹)</label><input type="number" id="pPrice" class="form-control" placeholder="5000" min="1" required></div>
+        <div class="form-group"><label class="form-label">Original Price (₹)</label><input type="number" id="pOriginal" class="form-control" placeholder="Optional" min="1"></div>
       </div>
       <div class="form-group"><label class="form-label required">Quantity</label><input type="number" id="pQty" class="form-control" value="1" min="1" required></div>
       <div class="form-group"><label class="form-label required">Description (max 200 chars)</label><textarea id="pDesc" class="form-control" rows="3" maxlength="200" placeholder="Describe the item..." required></textarea></div>
@@ -444,14 +444,14 @@ function handleSearch(val) {
   if (!val.trim()) { sugg.classList.remove('show'); return; }
   const matches = allProducts.filter(p => p.title.toLowerCase().includes(val.toLowerCase())).slice(0, 6);
   if (!matches.length) { sugg.classList.remove('show'); return; }
-  sugg.innerHTML = matches.map(p => `<div class="search-suggestion-item" onclick="openProductDetail(${p.id})"><strong>${p.title.substring(0,40)}</strong> ΓÇö Γé╣${p.price.toLocaleString()}</div>`).join('');
+  sugg.innerHTML = matches.map(p => `<div class="search-suggestion-item" onclick="openProductDetail(${p.id})"><strong>${p.title.substring(0,40)}</strong> — ₹${p.price.toLocaleString()}</div>`).join('');
   sugg.classList.add('show');
   document.addEventListener('click', () => sugg.classList.remove('show'), { once: true });
 }
 
 function renderProducts(list) {
   if (!list.length) {
-    document.getElementById('productsGrid').innerHTML = `<div class="empty-state"><span class="empty-state-icon">≡ƒôª</span><div class="empty-state-title">Nothing Here Yet</div><p class="empty-state-desc">No products match your search or filters. Try a different category or clear your search.</p><a href=\"shop.html\" class=\"btn btn-outline btn-sm\"><i class=\"fas fa-times\"></i> Clear Filters</a></div>`;
+    document.getElementById('productsGrid').innerHTML = `<div class="empty-state"><span class="empty-state-icon">📦</span><div class="empty-state-title">Nothing Here Yet</div><p class="empty-state-desc">No products match your search or filters. Try a different category or clear your search.</p><a href=\"shop.html\" class=\"btn btn-outline btn-sm\"><i class=\"fas fa-times\"></i> Clear Filters</a></div>`;
     return;
   }
   document.getElementById('productsGrid').innerHTML = list.map(renderProductCard).join('');
@@ -460,7 +460,7 @@ function renderProducts(list) {
   if (window.initCardTilt) initCardTilt();
 }
 
-// ΓöÇΓöÇΓöÇ Cloudinary Image Optimizer ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Cloudinary Image Optimizer ───────────────────────────────
 // Injects w_{w},q_auto,f_auto into Cloudinary CDN URLs.
 // Non-Cloudinary URLs (Unsplash etc.) pass through unchanged.
 function cloudinaryOptimize(url, w) {
@@ -477,13 +477,13 @@ function renderProductCard(p) {
       <div style="overflow:hidden;position:relative;">
         <img loading="lazy" src="${cloudinaryOptimize(p.image_url, 400)}" alt="${p.title}" class="product-card-img" loading="lazy">
         ${disc>0 ? `<span style="position:absolute;top:10px;left:10px;background:var(--accent-red);color:white;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:800;">${disc}% OFF</span>` : ''}
-        ${p.eco ? `<span style="position:absolute;top:10px;right:10px;background:rgba(16,185,129,0.9);color:white;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:800;">≡ƒî┐ Eco</span>` : ''}
+        ${p.eco ? `<span style="position:absolute;top:10px;right:10px;background:rgba(16,185,129,0.9);color:white;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:800;">🌿 Eco</span>` : ''}
       </div>
       <div class="product-card-body">
         <div class="product-card-title">${p.title}</div>
         <div style="display:flex;align-items:center;gradient:var(--accent-primary);margin:6px 0;">
-          <span class="product-card-price">Γé╣${p.price.toLocaleString()}</span>
-          ${p.original_price ? `<span class="product-card-original">Γé╣${p.original_price.toLocaleString()}</span>` : ''}
+          <span class="product-card-price">₹${p.price.toLocaleString()}</span>
+          ${p.original_price ? `<span class="product-card-original">₹${p.original_price.toLocaleString()}</span>` : ''}
         </div>
         <div class="product-card-meta">
           <span class="badge badge-condition">${p.condition}</span>
@@ -511,10 +511,10 @@ async function openProductDetail(id) {
   const inWl = wishlist.some(w => w.id === p.id);
   const is360 = p.category === 'electronics' && p.price >= 5000;
   const stockBadge = p.quantity === 0
-    ? `<span class="low-stock-badge">Γ¥î Out of Stock</span>`
+    ? `<span class="low-stock-badge">❌ Out of Stock</span>`
     : p.quantity <= 2
-    ? `<span class="low-stock-badge">ΓÜá∩╕Å Only ${p.quantity} left</span>`
-    : `<span style="color:var(--accent-green);font-weight:700;">Γ£à In Stock (${p.quantity})</span>`;
+    ? `<span class="low-stock-badge">⚠️ Only ${p.quantity} left</span>`
+    : `<span style="color:var(--accent-green);font-weight:700;">✅ In Stock (${p.quantity})</span>`;
 
   const images = (p.images && p.images.length > 0) ? p.images : [p.image_url];
   const imageCarousel = images.length > 1 
@@ -526,7 +526,7 @@ async function openProductDetail(id) {
        </div>`
     : `<div class="zoom-wrap">
         <img loading="lazy" src="${images[0]}" alt="${p.title}" style="height:280px;object-fit:cover;width:100%;border-radius:16px;">
-        <span class="zoom-badge">≡ƒöì Hover to Zoom</span>
+        <span class="zoom-badge">🔍 Hover to Zoom</span>
       </div>`;
 
   document.getElementById('productModalContent').innerHTML = `
@@ -534,18 +534,18 @@ async function openProductDetail(id) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:8px;">
       <div>
         ${is360 ? `<div class="spin-360-wrap">
-          <div class="spin-360-badge">Γå║ 360┬░</div>
+          <div class="spin-360-badge">🔄 360°</div>
           <img loading="lazy" src="${images[0]}" alt="${p.title}" style="width:100%;height:280px;object-fit:cover;transition:transform 0.4s;border-radius:16px;" id="spin360img">
         </div>
-        <button onclick="document.getElementById('spin360img').classList.toggle('spinning')" class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;"><i class="fas fa-sync"></i> Toggle 360┬░</button>` :
+        <button onclick="document.getElementById('spin360img').classList.toggle('spinning')" class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;"><i class="fas fa-sync"></i> Toggle 360°</button>` :
         imageCarousel}
-        ${p.eco ? `<div style="margin-top:8px;"><span class="badge badge-eco">≡ƒî┐ Eco-Friendly Item</span></div>` : ''}
+        ${p.eco ? `<div style="margin-top:8px;"><span class="badge badge-eco">🌿 Eco-Friendly Item</span></div>` : ''}
       </div>
       <div>
         <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:14px;line-height:1.3;">${p.title}</h2>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
-          <span style="font-size:2rem;font-weight:900;color:var(--accent-primary);">Γé╣${p.price.toLocaleString()}</span>
-          ${p.original_price ? `<span style="text-decoration:line-through;color:var(--text-muted);font-size:1rem;">Γé╣${p.original_price.toLocaleString()}</span><span style="background:var(--accent-red);color:white;padding:3px 10px;border-radius:8px;font-size:0.8rem;font-weight:800;">${disc}% OFF</span>` : ''}
+          <span style="font-size:2rem;font-weight:900;color:var(--accent-primary);">₹${p.price.toLocaleString()}</span>
+          ${p.original_price ? `<span style="text-decoration:line-through;color:var(--text-muted);font-size:1rem;">₹${p.original_price.toLocaleString()}</span><span style="background:var(--accent-red);color:white;padding:3px 10px;border-radius:8px;font-size:0.8rem;font-weight:800;">${disc}% OFF</span>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;font-size:0.9rem;">
           <div><span style="color:var(--text-muted);font-weight:600;">Category:</span> <strong>${p.category.charAt(0).toUpperCase()+p.category.slice(1)}</strong></div>
@@ -557,7 +557,7 @@ async function openProductDetail(id) {
         <div style="padding:12px;background:var(--bg-primary);border-radius:12px;margin-bottom:14px;">
           <div style="font-weight:700;margin-bottom:4px;">Seller</div>
           <div style="font-size:0.88rem;color:var(--text-secondary);">
-            ${currentUser ? `${p.seller_name} ┬╖ <i class="fas fa-check-circle" style="color:#3b82f6;"></i> Verified` : 'Verified Seller ┬╖ <span style="color:var(--text-muted)">Login to view contact</span>'}
+            ${currentUser ? `${p.seller_name} · <i class="fas fa-check-circle" style="color:#3b82f6;"></i> Verified` : 'Verified Seller · <span style="color:var(--text-muted)">Login to view contact</span>'}
           </div>
         </div>
         <div style="margin-bottom:14px;">
@@ -575,7 +575,7 @@ async function openProductDetail(id) {
     </div>
     <!-- Reviews -->
     <div style="margin-top:28px;border-top:1px solid var(--border-color);padding-top:20px;">
-      <h3 style="font-weight:800;margin-bottom:16px;">Γ¡É Reviews & Ratings</h3>
+      <h3 style="font-weight:800;margin-bottom:16px;">⭐ Reviews & Ratings</h3>
       <div id="reviewsList">Loading reviews...</div>
       ${currentUser && currentUser.role === 'buyer' ? `
       <div style="margin-top:20px;background:var(--bg-primary);border-radius:14px;padding:18px;">
@@ -583,11 +583,11 @@ async function openProductDetail(id) {
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
           <span style="font-size:0.88rem;font-weight:600;color:var(--text-muted);">Your Rating:</span>
           <div class="star-input" id="ratingInput">
-            <input type="radio" name="star" id="s5" value="5"><label for="s5">Γÿà</label>
-            <input type="radio" name="star" id="s4" value="4"><label for="s4">Γÿà</label>
-            <input type="radio" name="star" id="s3" value="3"><label for="s3">Γÿà</label>
-            <input type="radio" name="star" id="s2" value="2"><label for="s2">Γÿà</label>
-            <input type="radio" name="star" id="s1" value="1"><label for="s1">Γÿà</label>
+            <input type="radio" name="star" id="s5" value="5"><label for="s5">★</label>
+            <input type="radio" name="star" id="s4" value="4"><label for="s4">★</label>
+            <input type="radio" name="star" id="s3" value="3"><label for="s3">★</label>
+            <input type="radio" name="star" id="s2" value="2"><label for="s2">★</label>
+            <input type="radio" name="star" id="s1" value="1"><label for="s1">★</label>
           </div>
         </div>
         <textarea id="reviewComment" class="form-control" rows="2" placeholder="Share your experience..." style="margin-bottom:10px;"></textarea>
@@ -626,7 +626,7 @@ async function openProductDetail(id) {
   });
 }
 
-// ΓöÇΓöÇΓöÇ Cart ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Cart ────────────────────────────────────────────────────
 function loadCart() { cart = JSON.parse(localStorage.getItem('vm_cart') || '[]'); updateCartBadge(); }
 function saveCart() { localStorage.setItem('vm_cart', JSON.stringify(cart)); updateCartBadge(); }
 function updateCartBadge() {
@@ -643,7 +643,7 @@ function addToCartQuick(e, id) {
   if (!product) return;
   if (cart.find(c => c.id === id)) { showToast('Already in cart!', 'info'); return; }
   cart.push(product); saveCart();
-  showToast(`${product.title.substring(0,25)}... added! ≡ƒ¢Æ`, 'success');
+  showToast(`${product.title.substring(0,25)}... added! 🛒`, 'success');
 }
 
 function buyNow(id) {
@@ -667,7 +667,7 @@ function closeCart() {
 function renderCartDrawer() {
   if (!cart.length) {
     document.getElementById('cartBody').innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--text-muted);"><i class="fas fa-shopping-cart" style="font-size:3rem;opacity:0.3;margin-bottom:16px;"></i><p>Your cart is empty</p><a href="shop.html" class="btn btn-primary btn-sm" style="margin-top:16px;">Browse Products</a></div>';
-    document.getElementById('cartTotal').textContent = 'Γé╣0';
+    document.getElementById('cartTotal').textContent = '₹0';
     return;
   }
   document.getElementById('cartBody').innerHTML = cart.map(item => `
@@ -676,12 +676,12 @@ function renderCartDrawer() {
       <div class="cart-item-info">
         <div class="cart-item-title">${item.title}</div>
         <div style="font-size:0.78rem;color:var(--text-muted);">${item.condition}</div>
-        <div class="cart-item-price">Γé╣${item.price.toLocaleString()}</div>
+        <div class="cart-item-price">₹${item.price.toLocaleString()}</div>
       </div>
       <button onclick="removeFromCart(${item.id})" style="background:none;border:none;cursor:pointer;color:var(--accent-red);padding:4px;font-size:1rem;"><i class="fas fa-trash"></i></button>
     </div>`).join('');
   const total = cart.reduce((s,i) => s + i.price, 0);
-  document.getElementById('cartTotal').textContent = `Γé╣${total.toLocaleString()}`;
+  document.getElementById('cartTotal').textContent = `₹${total.toLocaleString()}`;
 }
 
 function removeFromCart(id) {
@@ -695,7 +695,7 @@ function proceedCheckout() {
   if (currentUser.role === 'seller') { showToast('Login with buyer account to access those features!', 'error'); return; }
   closeCart();
   const total = cart.reduce((s,i) => s + i.price, 0);
-  document.getElementById('paymentSummary').innerHTML = `<div style="font-weight:700;margin-bottom:8px;">${cart.length} item(s)</div><div style="font-size:1.2rem;font-weight:800;color:var(--accent-primary);">Total: Γé╣${total.toLocaleString()}</div>`;
+  document.getElementById('paymentSummary').innerHTML = `<div style="font-weight:700;margin-bottom:8px;">${cart.length} item(s)</div><div style="font-size:1.2rem;font-weight:800;color:var(--accent-primary);">Total: ₹${total.toLocaleString()}</div>`;
   selectedPaymentMethod = null;
   document.getElementById('confirmPayBtn').disabled = true;
   document.getElementById('upiQR').style.display = 'none';
@@ -720,7 +720,7 @@ async function confirmOrder() {
     await API.post('/orders', { items: cart.map(p => ({ id: p.id })), paymentMethod: selectedPaymentMethod });
     cart = []; saveCart();
     closeModal('paymentModal');
-    showToast('≡ƒÄë Order placed! Waiting for seller confirmation.', 'success');
+    showToast('🎉 Order placed! Waiting for seller confirmation.', 'success');
     // Show success animation
     document.getElementById('productsGrid').scrollIntoView({ behavior:'smooth' });
   } catch (err) {
@@ -729,7 +729,7 @@ async function confirmOrder() {
   }
 }
 
-// ΓöÇΓöÇΓöÇ Wishlist ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Wishlist ────────────────────────────────────────────────
 function loadWishlist() { wishlist = JSON.parse(localStorage.getItem('vm_wishlist') || '[]'); updateWishlistBadge(); }
 function saveWishlist() { localStorage.setItem('vm_wishlist', JSON.stringify(wishlist)); updateWishlistBadge(); }
 function updateWishlistBadge() {
@@ -745,7 +745,7 @@ function toggleWishlist(e, id) {
   const product = allProducts.find(p => p.id === id);
   const idx = wishlist.findIndex(w => w.id === id);
   if (idx > -1) { wishlist.splice(idx,1); showToast('Removed from wishlist', 'info'); }
-  else { wishlist.push(product); showToast('Saved to wishlist! Γ¥ñ∩╕Å', 'success'); }
+  else { wishlist.push(product); showToast('Saved to wishlist! ❤️', 'success'); }
   saveWishlist(); renderProducts(allProducts.filter(p => currentCat==='all' || p.category===currentCat));
 }
 
@@ -758,7 +758,7 @@ function openWishlistModal() {
         <img loading="lazy" src="${item.image_url}" style="width:60px;height:60px;object-fit:cover;border-radius:12px;" onclick="closeModal('wishlistModal');openProductDetail(${item.id});" style="cursor:pointer;">
         <div style="flex:1;">
           <div style="font-weight:700;font-size:0.9rem;cursor:pointer;" onclick="closeModal('wishlistModal');openProductDetail(${item.id});">${item.title}</div>
-          <div style="color:var(--accent-primary);font-weight:800;margin-top:2px;">Γé╣${item.price.toLocaleString()}</div>
+          <div style="color:var(--accent-primary);font-weight:800;margin-top:2px;">₹${item.price.toLocaleString()}</div>
         </div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-primary btn-sm" onclick="addToCartQuick(null,${item.id})"><i class="fas fa-cart-plus"></i></button>
@@ -769,7 +769,7 @@ function openWishlistModal() {
   openModal('wishlistModal');
 }
 
-// ΓöÇΓöÇΓöÇ Notifications ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Notifications ────────────────────────────────────────────
 async function loadNotifications() {
   try {
     const notifs = await API.get('/notifications');
@@ -809,7 +809,7 @@ async function markAllRead(e) {
   } catch {}
 }
 
-// ΓöÇΓöÇΓöÇ Sell Modal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Sell Modal ───────────────────────────────────────────────
 function openSellModal() {
   if (!currentUser || currentUser.role !== 'seller') { showToast('Only sellers can list products', 'error'); return; }
   openModal('sellModal');
@@ -841,7 +841,7 @@ async function submitProduct(e) {
       imageUrl: finalImageUrl,
       location: document.getElementById('pLocation').value
     });
-    showToast('Product submitted for admin approval! ≡ƒÄë', 'success');
+    showToast('Product submitted for admin approval! 🎉', 'success');
     closeModal('sellModal');
     document.getElementById('sellForm').reset();
   } catch(err) {
@@ -857,7 +857,7 @@ function goDashboard() {
   else if (currentUser.role === 'admin') window.location.href = 'admin.html';
 }
 
-// ΓöÇΓöÇΓöÇ Coupon ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Coupon ───────────────────────────────────────────────────
 let currentCouponDiscount = 0;
 async function applyCoupon() {
   const code = document.getElementById('couponInput').value.trim();
@@ -869,7 +869,7 @@ async function applyCoupon() {
     const total = p.price + (p.service_fee||0) + (p.platform_charge||0);
     const res = await API.post('/coupons/validate', { code, total });
     currentCouponDiscount = res.discount;
-    document.getElementById('couponMsg').innerHTML = `<div class="coupon-applied"><i class="fas fa-tag"></i> Coupon applied! You save Γé╣${res.discount}</div>`;
+    document.getElementById('couponMsg').innerHTML = `<div class="coupon-applied"><i class="fas fa-tag"></i> Coupon applied! You save ₹${res.discount}</div>`;
     updatePaymentSummary();
   } catch(err) {
     currentCouponDiscount = 0;
@@ -887,15 +887,15 @@ function updatePaymentSummary() {
   document.getElementById('paymentSummary').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:7px;font-size:0.9rem;">
       <div style="font-weight:700;margin-bottom:4px;">${p.title}</div>
-      <div style="display:flex;justify-content:space-between;"><span>Price</span><span>Γé╣${p.price.toLocaleString()}</span></div>
-      ${sf?`<div style="display:flex;justify-content:space-between;color:var(--text-muted);"><span>Service Fee</span><span>Γé╣${sf}</span></div>`:''}
-      ${pc?`<div style="display:flex;justify-content:space-between;color:var(--text-muted);"><span>Platform Charge</span><span>Γé╣${pc}</span></div>`:''}
-      ${disc?`<div style="display:flex;justify-content:space-between;color:var(--accent-green);font-weight:700;"><span>Coupon Discount</span><span>-Γé╣${disc}</span></div>`:''}
-      <div style="display:flex;justify-content:space-between;font-weight:900;font-size:1.1rem;border-top:1px solid var(--border-color);padding-top:7px;margin-top:3px;"><span>Total</span><span style="color:var(--accent-primary);">Γé╣${finalTotal.toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span>Price</span><span>₹${p.price.toLocaleString()}</span></div>
+      ${sf?`<div style="display:flex;justify-content:space-between;color:var(--text-muted);"><span>Service Fee</span><span>₹${sf}</span></div>`:''}
+      ${pc?`<div style="display:flex;justify-content:space-between;color:var(--text-muted);"><span>Platform Charge</span><span>₹${pc}</span></div>`:''}
+      ${disc?`<div style="display:flex;justify-content:space-between;color:var(--accent-green);font-weight:700;"><span>Coupon Discount</span><span>-₹${disc}</span></div>`:''}
+      <div style="display:flex;justify-content:space-between;font-weight:900;font-size:1.1rem;border-top:1px solid var(--border-color);padding-top:7px;margin-top:3px;"><span>Total</span><span style="color:var(--accent-primary);">₹${finalTotal.toLocaleString()}</span></div>
     </div>`;
 }
 
-// ΓöÇΓöÇΓöÇ Reviews ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Reviews ──────────────────────────────────────────────────
 async function loadReviews(productId) {
   try {
     const reviews = await API.get(`/reviews/${productId}`);
@@ -907,7 +907,7 @@ async function loadReviews(productId) {
     el.innerHTML = reviews.map(r => `<div class="review-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
         <div><div class="review-author">${r.reviewer_name}</div><div class="review-date">${new Date(r.created_at).toLocaleDateString()}</div></div>
-        <div class="review-stars">${'Γÿà'.repeat(r.rating)}${'Γÿå'.repeat(5-r.rating)}</div>
+        <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
       </div>
       ${r.comment?`<div class="review-text">${r.comment}</div>`:''}
     </div>`).join('');
@@ -920,25 +920,25 @@ async function submitReview(productId) {
   if (!rating) { showToast('Select a star rating', 'error'); return; }
   try {
     await API.post('/reviews', { productId, rating: parseInt(rating), comment });
-    showToast('Review submitted! Γ¡É', 'success');
+    showToast('Review submitted! ⭐', 'success');
     loadReviews(productId);
     document.querySelectorAll('input[name="star"]').forEach(r => r.checked = false);
     if (document.getElementById('reviewComment')) document.getElementById('reviewComment').value = '';
   } catch(err) { showToast(err.message, 'error'); }
 }
 
-// ΓöÇΓöÇΓöÇ Related Products ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Related Products ─────────────────────────────────────────
 async function loadRelated(currentId, category) {
   const related = allProducts.filter(p => p.id !== currentId && p.category === category).slice(0, 4);
   const el = document.getElementById('relatedSection');
   if (!el || !related.length) return;
-  el.innerHTML = `<h3 style="font-weight:800;margin-bottom:14px;">≡ƒôª Related Products</h3>
+  el.innerHTML = `<h3 style="font-weight:800;margin-bottom:14px;">📦 Related Products</h3>
     <div class="related-strip">${related.map(p=>`
       <div class="related-card" onclick="closeModal('productModal');setTimeout(()=>openProductDetail(${p.id}),150)">
         <img loading="lazy" src="${p.image_url}" alt="${p.title}" loading="lazy">
         <div class="related-card-body">
           <div class="related-card-title">${p.title}</div>
-          <div class="related-card-price">Γé╣${p.price.toLocaleString()}</div>
+          <div class="related-card-price">₹${p.price.toLocaleString()}</div>
         </div>
       </div>`).join('')}
     </div>`;
@@ -949,11 +949,11 @@ async function loadRelated(currentId, category) {
 <div class="chat-widget">
   <div class="chat-panel" id="chatPanel">
     <div class="chat-panel-header">
-      <div><div style="font-weight:800;">≡ƒÆ¼ Support Chat</div><div style="font-size:0.75rem;opacity:0.85;">We reply fast!</div></div>
-      <button onclick="document.getElementById('chatPanel').classList.remove('open')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;border-radius:8px;cursor:pointer;">Γ£ò</button>
+      <div><div style="font-weight:800;">💬 Support Chat</div><div style="font-size:0.75rem;opacity:0.85;">We reply fast!</div></div>
+      <button onclick="document.getElementById('chatPanel').classList.remove('open')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;border-radius:8px;cursor:pointer;">✕</button>
     </div>
     <div class="chat-messages-area" id="chatMsgs">
-      <div class="chat-msg theirs">≡ƒæï Need help? Ask us anything!<div class="chat-msg-time">Support</div></div>
+      <div class="chat-msg theirs">👋 Need help? Ask us anything!<div class="chat-msg-time">Support</div></div>
     </div>
     <div class="chat-input-row">
       <input type="text" id="chatInp" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendShopChat()">
@@ -978,7 +978,7 @@ async function loadShopChatMsgs() {
     const msgs = await API.get('/chat');
     const area = document.getElementById('chatMsgs');
     if (!msgs.length) return;
-    area.innerHTML = msgs.map(m => `<div class="chat-msg ${m.is_admin ? 'theirs' : 'mine'}" id="msg-${m.id}">${m.message}<div class="chat-msg-time">${m.is_admin ? 'Support' : 'You'} ┬╖ ${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${!m.is_admin ? ` <span style="cursor:pointer;color:var(--accent-red);margin-left:8px;" onclick="unsendShopChat(${m.id})" title="Unsend"><i class="fas fa-trash"></i></span>` : ''}</div></div>`).join('');
+    area.innerHTML = msgs.map(m => `<div class="chat-msg ${m.is_admin ? 'theirs' : 'mine'}" id="msg-${m.id}">${m.message}<div class="chat-msg-time">${m.is_admin ? 'Support' : 'You'} · ${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${!m.is_admin ? ` <span style="cursor:pointer;color:var(--accent-red);margin-left:8px;" onclick="unsendShopChat(${m.id})" title="Unsend"><i class="fas fa-trash"></i></span>` : ''}</div></div>`).join('');
     area.scrollTop = area.scrollHeight;
   } catch { }
 }
@@ -991,7 +991,7 @@ async function sendShopChat() {
   try { 
     const res = await API.post('/chat', { message: msg }); 
     const area = document.getElementById('chatMsgs');
-    area.innerHTML += `<div class="chat-msg mine" id="msg-${res.id}">${msg}<div class="chat-msg-time">You ┬╖ just now <span style="cursor:pointer;color:var(--accent-red);margin-left:8px;" onclick="unsendShopChat(${res.id})" title="Unsend"><i class="fas fa-trash"></i></span></div></div>`;
+    area.innerHTML += `<div class="chat-msg mine" id="msg-${res.id}">${msg}<div class="chat-msg-time">You · just now <span style="cursor:pointer;color:var(--accent-red);margin-left:8px;" onclick="unsendShopChat(${res.id})" title="Unsend"><i class="fas fa-trash"></i></span></div></div>`;
     area.scrollTop = area.scrollHeight;
   } catch { showToast('Failed to send message', 'error'); }
 }
@@ -1011,7 +1011,7 @@ async function unsendShopChat(id) {
       });
     }
   </script>
-<!-- ΓöÇΓöÇΓöÇ Mobile Bottom Navigation ΓöÇΓöÇΓöÇ -->
+<!-- ─── Mobile Bottom Navigation ─── -->
 <nav class="mobile-bottom-nav">
   <a href="index.html" class="bottom-nav-item" id="bn-home">
     <i class="fas fa-home"></i><span>Home</span>
