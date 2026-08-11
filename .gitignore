@@ -1,8 +1,20 @@
 node_modules/
 .env
-nirvanamart.db
 .DS_Store
-gitlog.txt
-NIRVANA DATA.xlsx
+
+# Database (contains PII — never commit)
+nirvanamart.db
 nirvanamart.db*
+
+# Log and debug files
+gitlog.txt
+out.txt
+
+# Seed/test scripts
+seed.js
+
+# Excel data files
+NIRVANA DATA.xlsx
+
+# Deployment config
 render.yaml

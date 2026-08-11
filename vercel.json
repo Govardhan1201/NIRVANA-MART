@@ -1,0 +1,38 @@
+{
+  "rewrites": [
+    { "source": "/shop", "destination": "/shop.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/register", "destination": "/register.html" },
+    { "source": "/buyer", "destination": "/buyer.html" },
+    { "source": "/seller", "destination": "/seller.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/cart", "destination": "/CART.html" },
+    { "source": "/ebooks", "destination": "/ebooks.html" },
+    { "source": "/corners", "destination": "/corners.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" }
+  ],
+  "headers": [
+    {
+      "source": "/shared/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    },
+    {
+      "source": "/(.*).html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}

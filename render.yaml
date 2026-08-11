@@ -8,16 +8,30 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Note: Database and API keys should be configured directly in the Render dashboard
+      # ── Required security secrets ─────────────────────────────
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_SECRET
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      # ── Database (Turso cloud SQLite) ─────────────────────────
       - key: TURSO_DATABASE_URL
         sync: false
       - key: TURSO_AUTH_TOKEN
         sync: false
-      - key: RESEND_API_KEY
+      # ── Email (Gmail SMTP via Nodemailer) ─────────────────────
+      - key: EMAIL_USER
         sync: false
+      - key: EMAIL_PASS
+        sync: false
+      # ── Image uploads (Cloudinary) ────────────────────────────
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
         sync: false
       - key: CLOUDINARY_API_SECRET
+        sync: false
+      # ── CORS (set to your Vercel frontend URL) ────────────────
+      - key: ALLOWED_ORIGIN
         sync: false

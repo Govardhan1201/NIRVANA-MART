@@ -5,7 +5,8 @@
 //             Offline fallback = 404.html
 // ═══════════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'nirvanamart-v3';
+const CACHE_VERSION = 'nm-v4';
+const CACHE_NAME = `nirvana-mart-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/404.html';
 
 // Static shell assets — cache on install
@@ -17,6 +18,7 @@ const PRECACHE = [
   '/buyer.html',
   '/seller.html',
   '/404.html',
+  '/ebooks.html',
   '/shared/css/main.css',
   '/shared/js/auth.js',
   '/shared/js/api.js',

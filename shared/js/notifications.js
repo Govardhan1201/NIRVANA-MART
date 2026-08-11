@@ -1,4 +1,4 @@
-﻿// NIRVANA MART – Notification Bell Widget
+// NIRVANA MART – Notification Bell Widget
 // Usage: include this script, then call NotificationBell.init('#navBellSlot')
 // The bell auto-connects to Socket.io and polls the /api/notifications endpoint.
 
@@ -73,11 +73,15 @@ const NotificationBell = (() => {
 
   function initSocket(token) {
     if (!token) return;
+    const backendUrl = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+      ? 'http://localhost:3000'
+      : 'https://nirvana-mart.onrender.com';
+    
     // Load socket.io client from the server
     const s = document.createElement('script');
-    s.src = '/socket.io/socket.io.js';
+    s.src = backendUrl + '/socket.io/socket.io.js';
     s.onload = () => {
-      socket = io({ auth: { token } });
+      socket = io(backendUrl, { auth: { token } });
       socket.emit('auth', token);
       socket.on('notification:new', () => load());
       socket.on('chat:message', (msg) => {

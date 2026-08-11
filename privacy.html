@@ -10,14 +10,14 @@
 </head>
 <body data-theme="dark">
   <div class="page-loader">
-    <img src="LOGO.png" alt="Nirvana Mart Logo" class="loader-logo-img">
+    <img src="LOGO.webp" alt="Nirvana Mart Logo" class="loader-logo-img">
     <div class="loader-bar"><div class="loader-bar-fill"></div></div>
   </div>
 
   <nav class="navbar">
     <div class="navbar-inner">
       <a href="index.html" class="nav-logo">
-        <img src="LOGO.png" alt="Nirvana Mart" class="nav-logo-img">
+        <img src="LOGO.webp" alt="Nirvana Mart" class="nav-logo-img">
       </a>
       <div style="flex:1"></div>
       <div class="nav-actions">
@@ -45,6 +45,12 @@
     </div>
   </main>
 
+  <script src="shared/js/auth.js"></script>
   <script src="shared/js/effects.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); });
+    }
+  </script>
 </body>
 </html>

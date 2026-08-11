@@ -67,15 +67,15 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/LOGO.png">
+  <link rel="apple-touch-icon" href="/LOGO.webp">
 </head>
 <body>
 <canvas id="particleCanvas"></canvas>
-<div class="page-loader" id="pageLoader"><div class="loader-logo"><img src="LOGO.png" alt="Nirvana Mart" class="loader-logo-img"></div><div class="loader-bar"><div class="loader-bar-fill"></div></div></div>
+<div class="page-loader" id="pageLoader"><div class="loader-logo"><img src="LOGO.webp" alt="Nirvana Mart" class="loader-logo-img"></div><div class="loader-bar"><div class="loader-bar-fill"></div></div></div>
 
 <nav class="navbar">
   <div class="navbar-inner container">
-    <a href="index.html" class="nav-logo"><img src="LOGO.png" alt="Nirvana Mart" class="nav-logo-img"></a>
+    <a href="index.html" class="nav-logo"><img src="LOGO.webp" alt="Nirvana Mart" class="nav-logo-img"></a>
     <div style="flex:1"></div>
     <div class="nav-actions">
       <button class="dark-toggle" id="darkModeToggle"></button>
@@ -495,7 +495,7 @@ function renderOrdersTable(orders, containerId) {
     el.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-muted);">No orders yet. <a href="shop.html" style="color:var(--accent-primary);">Start shopping!</a></p>';
     return;
   }
-  el.innerHTML = `<div style="overflow-x:auto;"><table class="order-table">
+  el.innerHTML = `<div style="overflow-x:auto;"><div class="table-responsive"><table class="order-table">
     <thead><tr><th>Product</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
     <tbody>${orders.map(o => `
       <tr>
@@ -510,7 +510,7 @@ function renderOrdersTable(orders, containerId) {
           <a href="/api/orders/${o.id}/invoice" target="_blank" class="btn btn-ghost btn-sm" title="Invoice" style="color:var(--accent-green);"><i class="fas fa-file-pdf"></i></a>
         </td>
       </tr>`).join('')}
-    </tbody></table></div>`;
+    </tbody></table></div></div>`;
 }
 
 // ── Product Reviews Section ──────────────────────────────────────

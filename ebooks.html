@@ -368,5 +368,11 @@
 
   document.addEventListener('DOMContentLoaded', loadEbooks);
   </script>
+  <script src="shared/js/auth.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); });
+    }
+  </script>
 </body>
 </html>

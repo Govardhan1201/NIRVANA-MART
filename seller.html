@@ -33,15 +33,15 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/LOGO.png">
+  <link rel="apple-touch-icon" href="/LOGO.webp">
 </head>
 <body>
 <canvas id="particleCanvas"></canvas>
-<div class="page-loader" id="pageLoader"><div class="loader-logo"><img src="LOGO.png" alt="Nirvana Mart" class="loader-logo-img"></div><div class="loader-bar"><div class="loader-bar-fill"></div></div></div>
+<div class="page-loader" id="pageLoader"><div class="loader-logo"><img src="LOGO.webp" alt="Nirvana Mart" class="loader-logo-img"></div><div class="loader-bar"><div class="loader-bar-fill"></div></div></div>
 
 <nav class="navbar">
   <div class="navbar-inner container">
-    <a href="index.html" class="nav-logo"><img src="LOGO.png" alt="Nirvana Mart" class="nav-logo-img"></a>
+    <a href="index.html" class="nav-logo"><img src="LOGO.webp" alt="Nirvana Mart" class="nav-logo-img"></a>
     <div style="flex:1"></div>
     <div class="nav-actions">
       <button class="dark-toggle" id="darkModeToggle"></button>
@@ -333,7 +333,7 @@
       if (!completedOrders.length) {
         el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;">No completed orders yet. Payouts appear here once orders complete.</p>';
       } else {
-        el.innerHTML = `<div style="overflow-x:auto;"><table class="order-table">
+        el.innerHTML = `<div style="overflow-x:auto;"><div class="table-responsive"><table class="order-table">
           <thead><tr><th>Product</th><th>Buyer</th><th>Product Price</th><th>Listing Fee</th><th>Your Payout</th><th>Date</th></tr></thead>
           <tbody>${completedOrders.map(o => `
             <tr>
@@ -344,7 +344,7 @@
               <td style="color:var(--accent-green);font-weight:800;">\u20b9${(o.seller_payout||0).toLocaleString()}</td>
               <td style="font-size:0.8rem;color:var(--text-muted);">${new Date(o.ordered_at).toLocaleDateString()}</td>
             </tr>`).join('')}
-          </tbody></table></div>`;
+          </tbody></table></div></div>`;
       }
     } catch {
       document.getElementById('earnTotal').textContent = '₹0';
@@ -363,7 +363,7 @@
 
       const el = document.getElementById('productsTable');
       if (!products.length) { el.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-muted);">No products listed yet. <button class="btn btn-primary btn-sm" onclick="showSection(\'list\')">List your first product</button></p>'; return; }
-      el.innerHTML = `<div style="overflow-x:auto;"><table class="order-table">
+      el.innerHTML = `<div style="overflow-x:auto;"><div class="table-responsive"><table class="order-table">
         <thead><tr><th>Product</th><th>Price</th><th>Category</th><th>Qty</th><th>Status</th><th>Listed</th><th>Action</th></tr></thead>
         <tbody>${products.map(p => `
           <tr>
@@ -377,7 +377,7 @@
               ${p.status !== 'approved' ? `<button class="btn btn-ghost btn-sm" style="color:var(--accent-red);" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>` : `<span style="font-size:0.75rem;color:var(--text-muted)">Locked</span>`}
             </td>
           </tr>`).join('')}
-        </tbody></table></div>`;
+        </tbody></table></div></div>`;
     } catch(e) {
       document.getElementById('statProducts').textContent = '0';
     }
@@ -390,7 +390,7 @@
       const renderTable = (orders, containerId) => {
         const el = document.getElementById(containerId);
         if (!orders.length) { el.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-muted);">No orders received yet</p>'; return; }
-        el.innerHTML = `<div style="overflow-x:auto;"><table class="order-table">
+        el.innerHTML = `<div style="overflow-x:auto;"><div class="table-responsive"><table class="order-table">
           <thead><tr><th>Product</th><th>Buyer</th><th>Amount</th><th>Your Payout</th><th>Payment</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>${orders.map(o => `
             <tr>
@@ -404,7 +404,7 @@
                 ${o.status === 'completed' ? `<a href="product.html?id=${o.product_id}#reviewsList" class="btn btn-ghost btn-sm" title="Leave Review" style="color:var(--accent-gold);"><i class="fas fa-star"></i></a>` : ''}
               </td>
             </tr>`).join('')}
-          </tbody></table></div>`;
+          </tbody></table></div></div>`;
       };
       renderTable(orders.slice(0,5), 'recentOrders');
       renderTable(orders, 'ordersTable');
@@ -459,7 +459,7 @@
       for (const file of selectedFiles) {
         const formData = new FormData();
         formData.append('image', file);
-        const res = await fetch(API_BASE === '/api' ? '/api/upload' : 'http://localhost:3000/api/upload', {
+        const res = await fetch(typeof API_BASE !== 'undefined' ? API_BASE + '/upload' : '/api/upload', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` },
           body: formData

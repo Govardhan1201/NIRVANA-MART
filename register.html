@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -37,7 +37,7 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/LOGO.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
 </head>
 <body>
 <div class="page-loader" id="pageLoader">
@@ -48,7 +48,7 @@
   <div class="auth-left">
     <div class="orb o1"></div><div class="orb o2"></div>
     <div class="auth-left-content">
-      <div class="auth-brand"><img src="LOGO.png" alt="Nirvana Mart" class="auth-logo-img"></div>
+      <div class="auth-brand"><img src="LOGO.webp" alt="Nirvana Mart" class="auth-logo-img"></div>
       <h2 class="auth-tagline">Join the<br><span>Community!</span></h2>
       <p class="auth-tagline-sub">Create your free account and start buying or selling on campus today. Takes less than 2 minutes.</p>
       <div class="af"><div class="af-icon">🔒</div><div class="af-text">Secure signup — college roll number verified</div></div>
@@ -211,9 +211,7 @@
 
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
-      });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); });
     }
   </script>
 </body>

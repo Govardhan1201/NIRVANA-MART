@@ -3,51 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Terms of Service for NIRVANA MART. Campus marketplace rules and guidelines.">
-  <title>Terms of Service — NIRVANA MART</title>
+  <title>Terms of Service — Nirvana Mart</title>
   <link rel="stylesheet" href="shared/css/main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body data-theme="dark">
-  <div class="page-loader">
-    <img src="LOGO.png" alt="Nirvana Mart Logo" class="loader-logo-img">
-    <div class="loader-bar"><div class="loader-bar-fill"></div></div>
-  </div>
-
-  <nav class="navbar">
-    <div class="navbar-inner">
-      <a href="index.html" class="nav-logo">
-        <img src="LOGO.png" alt="Nirvana Mart" class="nav-logo-img">
-      </a>
-      <div style="flex:1"></div>
-      <div class="nav-actions">
-        <a href="shop.html" class="btn btn-outline btn-sm">Shop</a>
-        <a href="index.html" class="btn btn-primary btn-sm">Back to Home</a>
-      </div>
-    </div>
-  </nav>
-
-  <main class="container page-pad" style="max-width:800px; padding-bottom:100px;">
-    <h1 class="section-title gradient-text" style="margin-bottom:40px;">Terms of Service</h1>
+<body>
+  <div class="container" style="padding: 100px 20px; min-height: 80vh;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 20px; color: var(--accent-primary);">Terms of Service</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 30px;">Last updated: August 2026</p>
     
-    <div class="card" style="padding:40px; line-height:1.8;">
-      <h3 style="margin-bottom:15px;">1. Acceptance of Terms</h3>
-      <p style="margin-bottom:25px; color:var(--text-secondary);">By accessing and using Nirvana Mart, you agree to comply with these terms. This platform is strictly for verified students of the campus.</p>
-
-      <h3 style="margin-bottom:15px;">2. User Responsibilities</h3>
-      <p style="margin-bottom:25px; color:var(--text-secondary);">You are responsible for maintaining the confidentiality of your account. Sellers must accurately represent their products, and buyers must honor their purchase commitments. Any fraudulent activity will result in immediate campus disciplinary action.</p>
-
-      <h3 style="margin-bottom:15px;">3. Admin Moderation</h3>
-      <p style="margin-bottom:25px; color:var(--text-secondary);">All product listings are subject to admin approval. The admin team reserves the right to reject any listing that violates campus guidelines or is deemed inappropriate.</p>
-
-      <h3 style="margin-bottom:15px;">4. Transactions and Logistics</h3>
-      <p style="margin-bottom:25px; color:var(--text-secondary);">Nirvana Mart facilitates connections between buyers and sellers. Sellers are required to hand over the product to the admin, and buyers must collect the product from the designated campus location upon notification.</p>
-
-      <h3 style="margin-bottom:15px;">5. Limitation of Liability</h3>
-      <p style="margin-bottom:25px; color:var(--text-secondary);">Nirvana Mart is provided "as is". We are not liable for the quality or warranty of second-hand items sold by students. All disputes must be resolved amiably through the admin mediation process.</p>
+    <div style="background: var(--bg-secondary); padding: 30px; border-radius: 12px; line-height: 1.6;">
+      <h2 style="margin-bottom: 15px;">1. Acceptance of Terms</h2>
+      <p style="margin-bottom: 20px; color: var(--text-secondary);">By accessing and using Nirvana Mart, you agree to be bound by these Terms of Service. This platform is exclusively for registered students and faculty of the campus.</p>
+      
+      <h2 style="margin-bottom: 15px;">2. User Conduct & Responsibilities</h2>
+      <p style="margin-bottom: 20px; color: var(--text-secondary);">Users must provide accurate registration information using valid campus credentials (roll numbers). Any fraudulent activity, posting of illegal items, or misuse of the platform will result in immediate termination of the account and potential reporting to campus administration.</p>
+      
+      <h2 style="margin-bottom: 15px;">3. Transactions & Safety</h2>
+      <p style="margin-bottom: 20px; color: var(--text-secondary);">Nirvana Mart acts as a facilitator. All actual exchanges, quality verifications, and payments are coordinated between the buyer and seller. We strongly recommend meeting at designated safe zones (like the Admin Desk) for physical handovers.</p>
+      
+      <h2 style="margin-bottom: 15px;">4. Fees and Payouts</h2>
+      <p style="margin-bottom: 20px; color: var(--text-secondary);">A small platform service fee is applied to successful transactions to maintain platform infrastructure. These fees are dynamically calculated and displayed before any order is confirmed.</p>
+      
+      <h2 style="margin-bottom: 15px;">5. Limitation of Liability</h2>
+      <p style="margin-bottom: 20px; color: var(--text-secondary);">Nirvana Mart, its developers, and administration are not liable for any damages, losses, or disputes arising from transactions made through this platform. Users buy and sell at their own risk.</p>
     </div>
-  </main>
-
+    
+    <div style="margin-top: 40px; text-align: center;">
+      <a href="index.html" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    </div>
+  </div>
+  <script src="shared/js/auth.js"></script>
   <script src="shared/js/effects.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); });
+    }
+  </script>
 </body>
 </html>

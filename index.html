@@ -10,11 +10,17 @@
   <meta property="og:title" content="Nirvana Mart — Campus Marketplace">
   <meta property="og:description" content="Buy and sell on campus with Nirvana Mart. Verified students, secure transactions.">
   <meta property="og:type" content="website">
+  <meta property="og:image" content="https://nirvana-mart.onrender.com/LOGO.webp">
+  <meta property="og:url" content="https://nirvana-mart.onrender.com/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nirvana Mart — Campus Marketplace">
+  <meta name="twitter:description" content="Buy and sell on campus with Nirvana Mart. Verified students, secure transactions.">
+  <meta name="twitter:image" content="https://nirvana-mart.onrender.com/LOGO.webp">
   <meta name="theme-color" content="#c8923a">
-  <link rel="canonical" href="/">
+  <link rel="canonical" href="https://nirvana-mart.onrender.com/">
   <link rel="stylesheet" href="shared/css/main.css">
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebSite","name":"Nirvana Mart","url":"http://localhost:3000","description":"Campus marketplace for students","potentialAction":{"@type":"SearchAction","target":"/shop?search={search_term_string}","query-input":"required name=search_term_string"}}
+  {"@context":"https://schema.org","@type":"WebSite","name":"Nirvana Mart","url":"https://nirvana-mart.onrender.com","description":"Campus marketplace for students","potentialAction":{"@type":"SearchAction","target":"/shop?search={search_term_string}","query-input":"required name=search_term_string"}}
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -23,7 +29,7 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/LOGO.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
 </head>
 
 <body>
@@ -31,7 +37,7 @@
 
   <!-- ─── Page Loader ─────────────────────────────────────── -->
   <div class="page-loader" id="pageLoader">
-    <img loading="lazy" src="LOGO.png" alt="Nirvana Mart" class="loader-logo-img">
+    <img src="LOGO.webp" alt="Nirvana Mart" class="loader-logo-img">
     <div class="loader-bar">
       <div class="loader-bar-fill"></div>
     </div>
@@ -43,22 +49,19 @@
   <nav class="navbar" id="mainNav">
     <div class="navbar-inner container">
       <a href="index.html" class="nav-logo" onclick="burstCarts(event, this)">
-        <img loading="lazy" src="LOGO.png" alt="Nirvana Mart" class="nav-logo-img">
+        <img src="LOGO.webp" alt="Nirvana Mart" class="nav-logo-img">
       </a>
       <div style="flex:1"></div>
       <div class="nav-actions" id="navActions">
         <button class="dark-toggle" id="darkModeToggle" title="Toggle Dark Mode"></button>
-        <div id="guestNav" class="nav-actions" style="gap:8px;">
+        <div id="guestNav" style="display:flex;align-items:center;gap:8px;">
           <a href="login.html" class="btn btn-ghost btn-sm">Login</a>
           <a href="register.html" class="btn btn-primary btn-sm">Sign Up</a>
-          <a href="admin.html" class="btn btn-sm"
-            style="background:rgba(99,102,241,0.12);color:var(--accent-primary);border:1.5px solid rgba(99,102,241,0.3)">👑
-            Admin</a>
         </div>
         <div id="userNav" class="nav-actions" style="gap:8px; display:none;">
           <a href="shop.html" class="btn btn-primary btn-sm"><i class="fas fa-store"></i> Shop</a>
           <div class="nav-icon-btn" id="userMenuTrigger" style="padding:0;cursor:pointer;position:relative;" title="Profile Menu">
-            <img id="userAvatarImg" src="" alt="User" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">
+          <img id="userAvatarImg" src="" alt="User" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6366f1&color=fff&rounded=true'">
             <div class="dropdown-panel" id="userDropdown">
               <div class="dropdown-header"><div id="ddName" style="font-weight:700;"></div><div id="ddRole" style="font-size:0.8rem;color:var(--text-muted);text-transform:capitalize;"></div></div>
               <div class="dropdown-item" onclick="goDashboard()"><div class="di-icon" style="background:rgba(99,102,241,0.1);">🗂️</div>Dashboard</div>
@@ -93,7 +96,7 @@
     </div>
 
     <div class="container" style="position: relative; z-index: 2; pointer-events: none;">
-      <div class="hero-content" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center; min-height:80vh;">
+      <div class="hero-content-grid">
         <div style="pointer-events: auto;">
           <div class="hero-eyebrow" data-reveal>
             <span style="width:8px;height:8px;background:#a5b4fc;border-radius:50%;"></span>
@@ -424,7 +427,7 @@
     <div class="container">
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;">
         <div>
-          <img loading="lazy" src="LOGO.png" alt="Nirvana Mart" class="footer-logo-img">
+          <img loading="lazy" src="LOGO.webp" alt="Nirvana Mart" class="footer-logo-img">
           <p style="margin-top:20px; font-size:0.95rem; line-height:1.7;">Your exclusive campus marketplace to buy,
             sell, and connect with verified peers safely.</p>
         </div>
@@ -516,7 +519,7 @@
           const disc = p.original_price ? Math.round((1 - p.price / p.original_price) * 100) : 0;
           return `<div class="product-card card-3d" onclick="window.location.href='shop.html'" style="cursor:pointer;">
           <div style="overflow:hidden;position:relative;">
-            <img loading="lazy" src="${cloudinaryOptimize(p.image_url, 400)}" alt="${p.title}" class="product-card-img" loading="lazy" loading="lazy">
+            <img loading="lazy" src="${cloudinaryOptimize(p.image_url, 400)}" alt="${p.title}" class="product-card-img">
             ${disc > 0 ? `<span style="position:absolute;top:10px;left:10px;background:var(--accent-red);color:white;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:800;">${disc}% OFF</span>` : ''}
             ${p.eco ? `<span style="position:absolute;top:10px;right:10px;background:rgba(16,185,129,0.9);color:white;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:800;">🌿 Eco</span>` : ''}
             <button class="wishlist-btn" onclick="event.stopPropagation();"><i class="far fa-heart"></i></button>
@@ -609,6 +612,33 @@
         }, { passive: true });
       }
     });
+
+    // ─── Logo Burst Animation ─────────────────────────────────
+    function burstCarts(e, el) {
+      e.preventDefault();
+      const img = el.querySelector('img');
+      if (!img) return;
+      img.classList.add('logo-burst-center');
+      const emojis = ['🛒','🎓','📚','💸','🛍️','⚡'];
+      for (let i = 0; i < 8; i++) {
+        const span = document.createElement('span');
+        span.className = 'burst-cart';
+        span.textContent = emojis[i % emojis.length];
+        const angle = (i / 8) * 360;
+        const dist = 120 + Math.random() * 80;
+        span.style.cssText = `left:${window.innerWidth/2}px;top:${window.innerHeight/2}px;`;
+        document.body.appendChild(span);
+        span.animate([
+          { transform: 'translate(-50%,-50%) scale(0)', opacity: 1 },
+          { transform: `translate(calc(-50% + ${Math.cos(angle*Math.PI/180)*dist}px), calc(-50% + ${Math.sin(angle*Math.PI/180)*dist}px)) scale(1.5)`, opacity: 0 }
+        ], { duration: 700, easing: 'ease-out', fill: 'forwards' })
+        .onfinish = () => span.remove();
+      }
+      setTimeout(() => {
+        img.classList.remove('logo-burst-center');
+        window.location.href = 'index.html';
+      }, 700);
+    }
   </script>
 
   <!-- Mobile Bottom Navigation -->
@@ -630,6 +660,10 @@
       <span>Profile</span>
     </a>
   </div>
+  <footer style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem; padding-bottom: 80px;">
+    <a href="privacy.html" style="color: inherit; text-decoration: underline; margin: 0 10px;">Privacy Policy</a> | 
+    <a href="terms.html" style="color: inherit; text-decoration: underline; margin: 0 10px;">Terms of Service</a>
+  </footer>
 </body>
 
 </html>

@@ -13,6 +13,8 @@ const multer = require('multer');
 const path = require('path');
 const xlsx = require('xlsx');
 const fs = require('fs');
+const stream = require('stream');
+const PDFDocument = require('pdfkit');
 
 // ─── Gmail SMTP Email Client (Nodemailer) ────────────────────────────────────────────────
 const nodemailer = require('nodemailer');
@@ -20,19 +22,19 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'nirvanamart0@gmail.com',
+    user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
 });
 
 async function sendEmail({ to, subject, html }) {
-  if (!process.env.EMAIL_PASS || !to) {
-    console.warn('Email sending skipped: EMAIL_PASS or recipient missing.');
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !to) {
+    console.warn('Email sending skipped: EMAIL_USER, EMAIL_PASS, or recipient missing.');
     return;
   }
   try {
     await transporter.sendMail({
-      from: `"NIRVANA MART" <${process.env.EMAIL_USER || 'nirvanamart0@gmail.com'}>`,
+      from: `"NIRVANA MART" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html
@@ -70,8 +72,14 @@ function htmlEscape(str) {
 
 const app = express();
 const httpServer = http.createServer(app);
+const SOCKET_ALLOWED_ORIGINS = [
+  process.env.ALLOWED_ORIGIN,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://nirvana-mart.onrender.com'
+].filter(Boolean);
 const io = new SocketServer(httpServer, {
-  cors: { origin: process.env.ALLOWED_ORIGIN || '*', credentials: true }
+  cors: { origin: SOCKET_ALLOWED_ORIGINS, credentials: true }
 });
 
 const PORT = process.env.PORT || 3000;
@@ -142,7 +150,8 @@ const globalLimiter = rateLimit({
   message: { error: 'Too many requests from this IP, please try again after 5 minutes' },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => req.path.startsWith('/admin') // Optional: skip heavy frontend requests if needed
+  // Only skip the static admin HTML page, not any API routes
+  skip: (req) => req.path === '/nirvanamart-admin-portal'
 });
 app.use('/api', globalLimiter);
 
@@ -580,17 +589,21 @@ app.post('/api/auth/forgot-password/reset', async (req, res) => {
 // ─── PRODUCT ROUTES ───────────────────────────────────────────────────────────
 app.get('/api/products', async (req, res) => {
   try {
-    const { category, search, corner } = req.query;
+    const { category, search, corner, page, limit } = req.query;
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const pageSize = Math.min(100, Math.max(1, parseInt(limit) || 20));
+    const offset = (pageNum - 1) * pageSize;
     let sql = "SELECT * FROM products WHERE status = 'approved'";
+    let countSql = "SELECT COUNT(*) as total FROM products WHERE status = 'approved'";
     const params = [];
-    if (category && category !== 'all') { sql += ' AND category = ?'; params.push(category); }
-    if (corner && corner !== 'general') { sql += ' AND corner = ?'; params.push(corner); }
-    if (search) { sql += ' AND (title LIKE ? OR description LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
-    sql += ' ORDER BY created_at DESC LIMIT 100';
-    let rows = await db.all(sql, params);
-    // Parse images_json for each product
-    rows = rows.map(p => ({ ...p, images: tryParseJSON(p.images_json, [p.image_url].filter(Boolean)) }));
-    res.json(rows);
+    if (category && category !== 'all') { sql += ' AND category = ?'; countSql += ' AND category = ?'; params.push(category); }
+    if (corner && corner !== 'general') { sql += ' AND corner = ?'; countSql += ' AND corner = ?'; params.push(corner); }
+    if (search) { sql += ' AND (title LIKE ? OR description LIKE ?)'; countSql += ' AND (title LIKE ? OR description LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
+    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    const [rows, countRow] = await Promise.all([db.all(sql, [...params, pageSize, offset]), db.get(countSql, params)]);
+    const total = countRow ? countRow.total : 0;
+    const parsedRows = rows.map(p => ({ ...p, images: tryParseJSON(p.images_json, [p.image_url].filter(Boolean)) }));
+    res.json({ products: parsedRows, total, page: pageNum, pageSize, totalPages: Math.ceil(total / pageSize) });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -710,6 +723,7 @@ app.post('/api/orders', authenticate, async (req, res) => {
   try {
     if (req.user.role === 'seller') return res.status(403).json({ error: 'Sellers cannot place orders' });
     const { items, paymentMethod } = req.body;
+    if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'Cart is empty' });
     const createdOrders = [];
     const admin = await db.get("SELECT roll_number FROM users WHERE role = 'admin'");
 
@@ -827,17 +841,16 @@ app.post('/api/upload', authenticate, upload.single('image'), async (req, res) =
     }
     
     const cloudinaryUpload = () => new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
+      const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'nirvanamart' },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
         }
       );
-      const s = require('stream');
-      const pass = new s.PassThrough();
+      const pass = new stream.PassThrough();
       pass.end(req.file.buffer);
-      pass.pipe(stream);
+      pass.pipe(uploadStream);
     });
     
     const result = await cloudinaryUpload();
@@ -865,23 +878,27 @@ app.get('/api/notifications', authenticate, async (req, res) => {
   catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.put('/api/notifications/read', authenticate, async (req, res) => {
+// Mark all as read — supports both PUT (legacy) and PATCH (standard)
+const markNotifsRead = async (req, res) => {
   try { await db.run('UPDATE notifications SET is_read = 1 WHERE user_roll = ?', [req.user.rollNumber]); res.json({ success: true }); }
   catch (err) { res.status(500).json({ error: err.message }); }
-});
+};
+app.put('/api/notifications/read', authenticate, markNotifsRead);
+app.patch('/api/notifications/read', authenticate, markNotifsRead);
 
 
 // ─── ADMIN STATS & ANALYTICS ──────────────────────────────────────────────────
 app.get('/api/admin/stats', requireAdmin, async (req, res) => {
-  console.log('GET /api/admin/stats called by:', req.user.rollNumber);
   try {
-    const users = await db.get("SELECT COUNT(*) as count FROM users WHERE role != 'admin'");
-    const products = await db.get("SELECT COUNT(*) as count FROM products WHERE status = 'approved'");
-    const pendingProducts = await db.get("SELECT COUNT(*) as count FROM products WHERE status = 'pending'");
-    const orders = await db.get("SELECT COUNT(*) as count FROM orders");
-    const pendingOrders = await db.get("SELECT COUNT(*) as count FROM orders WHERE status != 'completed' AND status != 'cancelled'");
-    const earnings = await db.get("SELECT * FROM earnings WHERE id = 1");
-
+    // Run all 5 count queries in parallel for performance
+    const [users, products, pendingProducts, orders, pendingOrders, earnings] = await Promise.all([
+      db.get("SELECT COUNT(*) as count FROM users WHERE role != 'admin'"),
+      db.get("SELECT COUNT(*) as count FROM products WHERE status = 'approved'"),
+      db.get("SELECT COUNT(*) as count FROM products WHERE status = 'pending'"),
+      db.get("SELECT COUNT(*) as count FROM orders"),
+      db.get("SELECT COUNT(*) as count FROM orders WHERE status != 'completed' AND status != 'cancelled'"),
+      db.get("SELECT * FROM earnings WHERE id = 1")
+    ]);
     res.json({
       users: users ? users.count : 0,
       products: products ? products.count : 0,
@@ -918,8 +935,13 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
 
 app.delete('/api/admin/users/:roll', requireAdmin, async (req, res) => {
   try {
+    const { role } = req.query; // e.g. ?role=buyer or ?role=seller
     if (req.params.roll === req.user.rollNumber) return res.status(400).json({ error: 'Cannot delete yourself' });
-    await db.run('DELETE FROM users WHERE roll_number = ?', [req.params.roll]);
+    if (role && ['buyer', 'seller'].includes(role)) {
+      await db.run('DELETE FROM users WHERE roll_number = ? AND role = ?', [req.params.roll, role]);
+    } else {
+      await db.run('DELETE FROM users WHERE roll_number = ?', [req.params.roll]);
+    }
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -947,7 +969,7 @@ app.put('/api/admin/promote-all-years', requireAdmin, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers (kept here; also defined before POST /api/orders above via hoisting) ──
 function calcServiceFee(price) {
   if (price <= 500) return Math.max(20, Math.round(price * 0.05));
   if (price <= 2000) return Math.round(price * 0.05);
@@ -1211,23 +1233,9 @@ app.post('/api/chat/admin-reply', requireAdmin, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ─── NOTIFICATIONS API ──────────────────────────────────────────────────────────
-app.get('/api/notifications', authenticate, async (req, res) => {
-  try {
-    const notifs = await db.all(
-      'SELECT * FROM notifications WHERE user_roll = ? ORDER BY created_at DESC LIMIT 30',
-      [req.user.rollNumber]
-    );
-    res.json(notifs);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
 
-app.patch('/api/notifications/read', authenticate, async (req, res) => {
-  try {
-    await db.run('UPDATE notifications SET is_read=1 WHERE user_roll=?', [req.user.rollNumber]);
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+// ─── NOTIFICATIONS PATCH handled at line 887 (no duplicate) ────────────────
+
 
 app.post('/api/notifications', requireAdmin, async (req, res) => {
   try {
@@ -1256,7 +1264,6 @@ app.get('/api/orders/:id/invoice', authenticate, async (req, res) => {
     if (req.user.role !== 'admin' && req.user.rollNumber !== order.buyer_roll)
       return res.status(403).json({ error: 'Access denied' });
 
-    const PDFDocument = require('pdfkit');
     const doc = new PDFDocument({ margin: 50 });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.id}.pdf`);
@@ -1271,7 +1278,7 @@ app.get('/api/orders/:id/invoice', authenticate, async (req, res) => {
     doc.fontSize(18).font('Helvetica-Bold').text('INVOICE', 50, 115);
     doc.fontSize(10).font('Helvetica');
     doc.text(`Invoice #: INV-${String(order.id).padStart(5,'0')}`, 50, 145);
-    doc.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-IN')}`, 50, 160);
+    doc.text(`Date: ${new Date(order.ordered_at).toLocaleDateString('en-IN')}`, 50, 160);
     doc.text(`Payment Method: ${order.payment_method}`, 50, 175);
     doc.text(`Status: ${order.status.toUpperCase()}`, 50, 190);
 
@@ -1336,14 +1343,13 @@ app.post('/api/academic/upload-file', authenticate, uploadDoc.single('file'), as
   try {
     if (!req.file) return res.status(400).json({ error: 'No file provided' });
     const cloudinaryUpload = () => new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
+      const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'nirvanamart-academic', resource_type: 'raw', use_filename: true, unique_filename: true },
         (error, result) => { if (error) reject(error); else resolve(result); }
       );
-      const s = require('stream');
-      const pass = new s.PassThrough();
+      const pass = new stream.PassThrough();
       pass.end(req.file.buffer);
-      pass.pipe(stream);
+      pass.pipe(uploadStream);
     });
     const result = await cloudinaryUpload();
     res.json({ success: true, url: result.secure_url });
@@ -1450,7 +1456,7 @@ app.get('/nirvanamart-admin-portal', (req, res) => res.sendFile(path.join(__dirn
 // ─── SEO ──────────────────────────────────────────────────────────────────────
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
-  res.send(`User-agent: *\nDisallow: /api/\nDisallow: /nirvanamart-admin-portal\nSitemap: https://nirvana-mart.onrender.com/sitemap.xml`);
+  res.send(`User-agent: *\nDisallow: /api/\nDisallow: /nirvanamart-admin-portal\nDisallow: /login\nDisallow: /register\nDisallow: /buyer\nDisallow: /seller\nSitemap: https://nirvana-mart.onrender.com/sitemap.xml`);
 });
 
 app.get('/sitemap.xml', async (req, res) => {

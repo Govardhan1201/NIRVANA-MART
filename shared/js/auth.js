@@ -1,4 +1,4 @@
-﻿// NIRVANA MART Auth Helper
+// NIRVANA MART Auth Helper
 const Auth = {
   getUser() {
     try { return JSON.parse(localStorage.getItem('vm_user')); } catch { return null; }
@@ -35,6 +35,6 @@ window.Auth = Auth;
 
 // Apply dark mode theme immediately
 (function() {
-  const theme = localStorage.getItem('vm_theme') || 'light';
+  const theme = localStorage.getItem('vm_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', theme);
 })();

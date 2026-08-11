@@ -1,7 +1,7 @@
 // NIRVANA MART API Client
-const API_BASE = window.location.protocol === 'file:' 
+const API_BASE = window.location.hostname === 'localhost' || window.location.protocol === 'file:' 
   ? 'http://localhost:3000/api'
-  : '/api';
+  : 'https://nirvana-mart.onrender.com/api';
 
 function getToken() { return localStorage.getItem('vm_token'); }
 
@@ -33,6 +33,7 @@ const API = {
   get: (path) => _fetch(path, { method: 'GET' }),
   post: (path, body) => _fetch(path, { method: 'POST', body: JSON.stringify(body) }),
   put: (path, body) => _fetch(path, { method: 'PUT', body: JSON.stringify(body) }),
+  patch: (path, body) => _fetch(path, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: (path) => _fetch(path, { method: 'DELETE' }),
 };
 
